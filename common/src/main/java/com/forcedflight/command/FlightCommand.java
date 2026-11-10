@@ -34,6 +34,10 @@ public final class FlightCommand {
 						.executes(FlightCommand::toggleSelf)
 						.then(Commands.literal("self").executes(FlightCommand::toggleSelf))
 						.then(Commands.literal("reload").requires(FlightCommand::isAdmin).executes(FlightCommand::reload))
+						.then(Commands.literal("joinmessage").requires(FlightCommand::isAdmin)
+								.executes(context -> setJoinMessage(context, !ModConfig.get().joinMessage))
+								.then(Commands.literal("on").executes(context -> setJoinMessage(context, true)))
+								.then(Commands.literal("off").executes(context -> setJoinMessage(context, false))))
 						.then(Commands.literal("maxspeed").requires(FlightCommand::isAdmin)
 								.executes(FlightCommand::showMaxSpeed)
 								.then(Commands.argument("multiplier", FloatArgumentType.floatArg(0.1f, 20.0f))
@@ -152,6 +156,14 @@ public final class FlightCommand {
 				speed
 		);
 		feedback(context, message);
+		return Command.SINGLE_SUCCESS;
+	}
+
+	private static int setJoinMessage(CommandContext<CommandSourceStack> context, boolean enabled) {
+		boolean saved = ModConfig.saveJoinMessage(enabled);
+		feedback(context, saved
+				? "Join message enabled. Players will see the flight controls when they log in."
+				: "Join message disabled. Players will not see the flight controls when they log in.");
 		return Command.SINGLE_SUCCESS;
 	}
 

@@ -1,6 +1,7 @@
 {
   "configVersion": 1,
   "enabled": true,
+  "joinMessage": true,
   "operatorLevel": 2,
   "defaultToggleKey": "I",
   "flight": {

@@ -14,6 +14,9 @@ public final class FlightHelp {
 	}
 
 	public static void tell(ServerPlayer player) {
+		if (!ModConfig.get().joinMessage) {
+			return;
+		}
 		if (!ModConfig.get().enabled) {
 			player.sendSystemMessage(Component.literal(
 					"Forced Creative Flight is installed, but disabled in config/forcedflight/config.json."), false);

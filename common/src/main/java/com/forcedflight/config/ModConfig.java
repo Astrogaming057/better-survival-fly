@@ -26,6 +26,7 @@ public final class ModConfig {
 	private static volatile ModConfig current = defaults();
 
 	public final boolean enabled;
+	public final boolean joinMessage;
 	public final int operatorLevel;
 	public final String defaultToggleKey;
 	public final float defaultSpeed;
@@ -46,6 +47,7 @@ public final class ModConfig {
 
 	private ModConfig(
 			boolean enabled,
+			boolean joinMessage,
 			int operatorLevel,
 			String defaultToggleKey,
 			float defaultSpeed,
@@ -65,6 +67,7 @@ public final class ModConfig {
 			List<UUID> bootstrapAllowControl
 	) {
 		this.enabled = enabled;
+		this.joinMessage = joinMessage;
 		this.operatorLevel = operatorLevel;
 		this.defaultToggleKey = defaultToggleKey;
 		this.defaultSpeed = defaultSpeed;
@@ -95,6 +98,7 @@ public final class ModConfig {
 		float min = 0.01f;
 		float max = DEFAULT_MAX_SPEED;
 		return new ModConfig(
+				true,
 				true,
 				2,
 				"I",
@@ -156,6 +160,38 @@ public final class ModConfig {
 	}
 
 	/** Saves a new server-wide maximum and returns the raw speed actually stored. */
+	public static boolean saveJoinMessage(boolean enabled) {
+		current = current.withJoinMessage(enabled);
+		if (ForcedFlightServices.configFile != null) {
+			write(ForcedFlightServices.configFile, current);
+		}
+		return current.joinMessage;
+	}
+
+	public ModConfig withJoinMessage(boolean enabled) {
+		return new ModConfig(
+				this.enabled,
+				enabled,
+				operatorLevel,
+				defaultToggleKey,
+				defaultSpeed,
+				minSpeed,
+				maxSpeed,
+				speedStep,
+				hudEnabled,
+				hudAnchor,
+				hudOffsetX,
+				hudOffsetY,
+				hudDurationTicks,
+				hudShowWhileFlying,
+				enforcementEnabled,
+				enforcementResync,
+				resyncCooldownTicks,
+				bootstrapAuthorized,
+				bootstrapAllowControl
+		);
+	}
+
 	public static float saveMaxSpeed(float rawMax) {
 		current = current.withMaxSpeed(rawMax);
 		if (ForcedFlightServices.configFile != null) {
@@ -168,6 +204,7 @@ public final class ModConfig {
 		float max = FlightSpeed.clamp(nextMax, this.minSpeed, ForcedFlight.HARD_MAX_SPEED);
 		return new ModConfig(
 				enabled,
+				joinMessage,
 				operatorLevel,
 				defaultToggleKey,
 				FlightSpeed.clamp(defaultSpeed, minSpeed, max),
@@ -235,6 +272,7 @@ public final class ModConfig {
 		JsonObject bootstrap = objectOf(root, "bootstrap");
 		return new ModConfig(
 				boolOf(root, "enabled", base.enabled),
+				boolOf(root, "joinMessage", base.joinMessage),
 				operatorLevel,
 				key.trim(),
 				fallback,
@@ -284,6 +322,7 @@ public final class ModConfig {
 		JsonObject root = new JsonObject();
 		root.addProperty("configVersion", 1);
 		root.addProperty("enabled", config.enabled);
+		root.addProperty("joinMessage", config.joinMessage);
 		root.addProperty("operatorLevel", config.operatorLevel);
 		root.addProperty("defaultToggleKey", config.defaultToggleKey);
 		JsonObject flight = new JsonObject();

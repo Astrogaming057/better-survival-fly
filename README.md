@@ -46,6 +46,9 @@ All of these are checked on the server.
 | `/flight <player> allowcontrol` | Operator | Let the player toggle their own flight. Saved across restarts. |
 | `/flight <player> revokecontrol` | Operator | Remove that permission. An existing flight grant stays. |
 | `/flight <player> status` | Operator | Show authorization, airborne state, control, and speed. |
+| `/flight joinmessage` | Operator | Toggle the login message that explains the controls. Saved in the config. |
+| `/flight joinmessage on` | Operator | Show that message when a player joins. |
+| `/flight joinmessage off` | Operator | Hide that message when a player joins. |
 | `/flight maxspeed` | Operator | Show the server-wide maximum, in the same `x` units as the speed display. |
 | `/flight maxspeed <number>` | Operator | Set that maximum, save it, and apply it to everyone online. `7.5` means `7.50x`. |
 | `/flight reload` | Operator | Reread `config.json` and `permissions.json`, then reapply them to online players. |
@@ -92,6 +95,8 @@ The HUD and the default key live in the client config. Speed limits, the operato
 ## Configuration
 
 `enabled` turns the whole system off. Commands refuse to grant flight while it is false.
+
+`joinMessage` controls the control instructions sent when a player joins. `/flight joinmessage` toggles it and writes this file.
 
 `operatorLevel` is the vanilla permission level treated as an operator. `2` matches a normal OP. The value is clamped to 1–4.
 
