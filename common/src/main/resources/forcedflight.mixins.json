@@ -1,0 +1,23 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "com.forcedflight.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "mixins": [
+    "PlayerTravelMixin",
+    "ServerPlayerMixin",
+    "ServerPlayerCopyMixin",
+    "ServerGamePacketListenerImplMixin",
+    "ServerPlayerGameModeMixin",
+    "ClientboundPlayerAbilitiesPacketMixin"
+  ],
+  "client": [
+    "LocalPlayerMixin",
+    "LocalPlayerAbilityMixin",
+    "ClientPacketListenerMixin",
+    "MouseHandlerMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}
