@@ -6,8 +6,10 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Abilities;
 import net.minecraft.world.level.GameType;
 
+import com.forcedflight.ForcedFlightServices;
 import com.forcedflight.network.FlightRequests;
 import com.forcedflight.network.FlightStatePayload;
+import com.forcedflight.permission.FlightPolicy;
 import com.forcedflight.permission.FlightSpeed;
 
 public final class FlightClientController {
@@ -22,6 +24,21 @@ public final class FlightClientController {
 
 	public static boolean usesVanillaFlight(LocalPlayer player) {
 		return vanillaOwns(player);
+	}
+
+	public static void installMiningHook() {
+		ForcedFlightServices.cancelClientFlyPenalty = player -> {
+			if (!(player instanceof LocalPlayer local)) {
+				return false;
+			}
+			ClientFlightState state = ClientFlightState.get();
+			return state.hasServerState && FlightPolicy.cancelFlyMiningPenalty(
+					state.flyPenalty,
+					local.getAbilities().flying,
+					local.onGround(),
+					vanillaOwns(local)
+			);
+		};
 	}
 
 	public static void applyServerState(FlightStatePayload payload, LocalPlayer player) {

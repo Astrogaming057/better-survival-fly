@@ -33,5 +33,13 @@ public final class FlightHelp {
 		player.sendSystemMessage(Component.literal(String.format(Locale.ROOT,
 				"Hold Alt and scroll to change speed, or type /flight speed <number>. Scroll up is faster, scroll down is slower. The server cap is %.2fx. This stays off in creative and spectator. Operators change the cap with /flight maxspeed. The speed display fades a few seconds after you stop scrolling.",
 				max)).withStyle(ChatFormatting.GRAY), false);
+		player.sendSystemMessage(Component.literal(ModConfig.get().flyPenalty
+				? "Breaking blocks while flying is slower. Operators can turn that off with /flight flypenalty."
+				: "Breaking blocks while flying uses normal speed. Operators can turn the slowdown back on with /flight flypenalty.")
+				.withStyle(ChatFormatting.GRAY), false);
+		player.sendSystemMessage(Component.literal(ModConfig.get().fallDamage
+				? "Falling still hurts when flight is granted but toggled off. Operators can turn that off with /flight falldamage."
+				: "Falling does not hurt when flight is granted but toggled off. Operators can turn that back on with /flight falldamage.")
+				.withStyle(ChatFormatting.GRAY), false);
 	}
 }

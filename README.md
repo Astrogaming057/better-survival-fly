@@ -1,6 +1,6 @@
 # Forced Creative Flight
 
-Minecraft **1.21.1** mod, version **1.1.0**, for Fabric, NeoForge, and Forge. It gives authorized players vanilla Creative flight while they stay in Survival. Health, hunger, inventory, armor, damage, death, experience, and block and entity interaction are unchanged. The mod never switches the player's game mode.
+Minecraft **1.21.1** mod, version **1.1.2**, for Fabric, NeoForge, and Forge. It gives authorized players vanilla Creative flight while they stay in Survival. Health, hunger, inventory, armor, damage, death, experience, and block and entity interaction are unchanged. The mod never switches the player's game mode.
 
 The server decides who may fly. The client sends toggle and speed requests, then applies the state the server confirms.
 
@@ -15,6 +15,8 @@ While the server has authorized a Survival or Adventure player:
 - The player can hover. Vanilla flight acceleration, sprint boost, and collision stay in charge.
 - Hold Alt and scroll to change flight speed, or use `/flight speed <number>` when that scroll does not work. Scroll up is faster, scroll down is slower. A plain scroll still moves the hotbar. The number uses the same units as the HUD, so `5` means `5.00x`.
 - Creative and spectator keep vanilla flight. The mod will not enable itself or change speed in those modes.
+- Breaking blocks while flying is slower, the same as any time you are off the ground. `/flight flypenalty off` removes that slowdown while flying. Jumping still uses the vanilla slowdown.
+- Falling still hurts when flight is granted but not currently toggled on. `/flight falldamage off` removes that damage. Creative and spectator stay vanilla.
 - Speed is remembered for that player.
 
 `I` and `/flight` are the permission toggle, not the Creative double-tap. Turning flight on authorizes the player and lifts them off. Turning it off removes the grant and drops them. Double-tap still works after that for anyone who remains authorized. Revoking independent control does not remove an authorization an operator already gave.
@@ -52,6 +54,12 @@ All of these are checked on the server.
 | `/flight joinmessage` | Operator | Toggle the login message that explains the controls. Saved in the config. |
 | `/flight joinmessage on` | Operator | Show that message when a player joins. |
 | `/flight joinmessage off` | Operator | Hide that message when a player joins. |
+| `/flight falldamage` | Operator | Toggle fall damage for players who have flight granted but are not currently flying. Saved in the config. |
+| `/flight falldamage on` | Operator | Those falls hurt again. |
+| `/flight falldamage off` | Operator | Those falls do not hurt. |
+| `/flight flypenalty` | Operator | Toggle the slower mining that vanilla applies while flying. Saved in the config. |
+| `/flight flypenalty on` | Operator | Mine slower while flying. |
+| `/flight flypenalty off` | Operator | Mine at normal speed while flying. Jumping is unchanged. |
 | `/flight maxspeed` | Operator | Show the server-wide maximum, in the same `x` units as the speed display. |
 | `/flight maxspeed <number>` | Operator | Set that maximum, save it, and apply it to everyone online. `7.5` means `7.50x`. |
 | `/flight reload` | Operator | Reread `config.json` and `permissions.json`, then reapply them to online players. |
@@ -72,17 +80,17 @@ $env:JAVA_HOME = "C:\path\to\jdk-21"
 
 | Loader | Jar |
 | --- | --- |
-| Fabric | `fabric/build/libs/forcedflight-fabric-1.1.0.jar` |
-| NeoForge | `neoforge/build/libs/forcedflight-neoforge-1.1.0.jar` |
-| Forge | `forge/build/libs/forcedflight-forge-1.1.0.jar` |
+| Fabric | `fabric/build/libs/forcedflight-fabric-1.1.2.jar` |
+| NeoForge | `neoforge/build/libs/forcedflight-neoforge-1.1.2.jar` |
+| Forge | `forge/build/libs/forcedflight-forge-1.1.2.jar` |
 
 ## Install
 
 Use the jar that matches the loader. The client and the server must use the same one. A Fabric jar does not load on NeoForge or Forge, and the three jars cannot be mixed.
 
-1. NeoForge 1.21.1: put `forcedflight-neoforge-1.1.0.jar` in the server `mods` folder and in the NeoForge client's `mods` folder.
-2. Forge 1.21.1: put `forcedflight-forge-1.1.0.jar` in both Forge `mods` folders.
-3. Fabric 1.21.1: install Fabric Loader and Fabric API, then put `forcedflight-fabric-1.1.0.jar` in both Fabric `mods` folders.
+1. NeoForge 1.21.1: put `forcedflight-neoforge-1.1.2.jar` in the server `mods` folder and in the NeoForge client's `mods` folder.
+2. Forge 1.21.1: put `forcedflight-forge-1.1.2.jar` in both Forge `mods` folders.
+3. Fabric 1.21.1: install Fabric Loader and Fabric API, then put `forcedflight-fabric-1.1.2.jar` in both Fabric `mods` folders.
 
 The client alone cannot grant flight. Restart the server after copying the jar. On join, chat explains the controls: `I` or `/flight` toggles permission, double-tap jump takes off, and Alt plus scroll changes speed. `/flight` is absent until that server has the matching jar.
 
@@ -100,6 +108,10 @@ The HUD and the default key live in the client config. Speed limits, the operato
 `enabled` turns the whole system off. Commands refuse to grant flight while it is false.
 
 `joinMessage` controls the control instructions sent when a player joins. `/flight joinmessage` toggles it and writes this file.
+
+`flyPenalty` keeps vanilla's slower mining while flying. `/flight flypenalty off` sets it to false and writes this file. A missing key stays on.
+
+`fallDamage` keeps fall damage when flight is granted but toggled off. `/flight falldamage off` sets it to false and writes this file. A missing key stays on.
 
 `operatorLevel` is the vanilla permission level treated as an operator. `2` matches a normal OP. The value is clamped to 1–4.
 

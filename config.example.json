@@ -2,6 +2,8 @@
   "configVersion": 1,
   "enabled": true,
   "joinMessage": true,
+  "flyPenalty": true,
+  "fallDamage": true,
   "operatorLevel": 2,
   "defaultToggleKey": "I",
   "flight": {

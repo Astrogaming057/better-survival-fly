@@ -12,6 +12,22 @@ public final class FlightPolicy {
 		return operator;
 	}
 
+	/**
+	 * Vanilla divides mining speed by 5 while the player is off the ground.
+	 * That slowdown can be removed for this mod's flight. Jumping, and creative or spectator flight, stay vanilla.
+	 */
+	public static boolean cancelFlyMiningPenalty(boolean penaltyEnabled, boolean flying, boolean onGround, boolean vanillaOwns) {
+		return !penaltyEnabled && flying && !onGround && !vanillaOwns;
+	}
+
+	/**
+	 * Fall damage can be removed when flight is granted but the player is not currently flying, so a fall
+	 * with the toggle off does not hurt them. Creative and spectator stay vanilla.
+	 */
+	public static boolean cancelAuthorizedFallDamage(boolean fallDamageEnabled, boolean authorized, boolean flying, boolean vanillaOwns) {
+		return !fallDamageEnabled && authorized && !flying && !vanillaOwns;
+	}
+
 	public static boolean canToggleSelf(boolean operator, boolean allowControl) {
 		return operator || allowControl;
 	}

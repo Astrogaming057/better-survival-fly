@@ -34,6 +34,14 @@ public final class FlightCommand {
 						.executes(FlightCommand::toggleSelf)
 						.then(Commands.literal("self").executes(FlightCommand::toggleSelf))
 						.then(Commands.literal("reload").requires(FlightCommand::isAdmin).executes(FlightCommand::reload))
+						.then(Commands.literal("falldamage").requires(FlightCommand::isAdmin)
+								.executes(context -> setFallDamage(context, !ModConfig.get().fallDamage))
+								.then(Commands.literal("on").executes(context -> setFallDamage(context, true)))
+								.then(Commands.literal("off").executes(context -> setFallDamage(context, false))))
+						.then(Commands.literal("flypenalty").requires(FlightCommand::isAdmin)
+								.executes(context -> setFlyPenalty(context, !ModConfig.get().flyPenalty))
+								.then(Commands.literal("on").executes(context -> setFlyPenalty(context, true)))
+								.then(Commands.literal("off").executes(context -> setFlyPenalty(context, false))))
 						.then(Commands.literal("joinmessage").requires(FlightCommand::isAdmin)
 								.executes(context -> setJoinMessage(context, !ModConfig.get().joinMessage))
 								.then(Commands.literal("on").executes(context -> setJoinMessage(context, true)))
@@ -176,6 +184,23 @@ public final class FlightCommand {
 				speed
 		);
 		feedback(context, message);
+		return Command.SINGLE_SUCCESS;
+	}
+
+	private static int setFallDamage(CommandContext<CommandSourceStack> context, boolean enabled) {
+		boolean saved = ModConfig.saveFallDamage(enabled);
+		feedback(context, saved
+				? "Fall damage enabled. Granted players still get hurt if they fall while flight is toggled off."
+				: "Fall damage disabled while flight is granted and toggled off. Falling in that state no longer hurts.");
+		return Command.SINGLE_SUCCESS;
+	}
+
+	private static int setFlyPenalty(CommandContext<CommandSourceStack> context, boolean enabled) {
+		boolean saved = ModConfig.saveFlyPenalty(enabled);
+		FlightManager.broadcastState();
+		feedback(context, saved
+				? "Fly mining penalty enabled. Breaking blocks while flying is slower."
+				: "Fly mining penalty disabled. Breaking blocks while flying uses normal speed. Jumping is unchanged.");
 		return Command.SINGLE_SUCCESS;
 	}
 

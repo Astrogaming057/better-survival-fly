@@ -19,6 +19,7 @@ import net.minecraft.client.Minecraft;
 @EventBusSubscriber(modid = ForcedFlight.MOD_ID, value = Dist.CLIENT, bus = EventBusSubscriber.Bus.MOD)
 public final class ForcedFlightNeoForgeClient {
 	static {
+		FlightClientController.installMiningHook();
 		ForcedFlightServices.acceptClientState = payload ->
 				FlightClientController.applyServerState(payload, Minecraft.getInstance().player);
 	}

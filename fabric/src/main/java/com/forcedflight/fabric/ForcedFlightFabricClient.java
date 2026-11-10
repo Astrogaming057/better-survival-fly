@@ -16,6 +16,7 @@ public final class ForcedFlightFabricClient implements ClientModInitializer {
 	@Override
 	public void onInitializeClient() {
 		ForcedFlightServices.sendRequest = ClientPlayNetworking::send;
+		com.forcedflight.client.FlightClientController.installMiningHook();
 		FlightClientHooks.toggle = KeyBindingHelper.registerKeyBinding(FlightClientHooks.createToggle());
 		ClientPlayNetworking.registerGlobalReceiver(FlightStatePayload.TYPE, (payload, context) ->
 				com.forcedflight.client.FlightClientController.applyServerState(payload, context.player()));

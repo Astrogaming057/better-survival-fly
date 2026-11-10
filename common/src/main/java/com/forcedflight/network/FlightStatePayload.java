@@ -15,7 +15,8 @@ public record FlightStatePayload(
 		boolean announce,
 		float minSpeed,
 		float maxSpeed,
-		float speedStep
+		float speedStep,
+		boolean flyPenalty
 ) implements CustomPacketPayload {
 	public static final Type<FlightStatePayload> TYPE = new Type<>(ResourceLocation.fromNamespaceAndPath("forcedflight", "state"));
 	public static final StreamCodec<RegistryFriendlyByteBuf, FlightStatePayload> STREAM_CODEC = StreamCodec.of(
@@ -30,6 +31,7 @@ public record FlightStatePayload(
 				buf.writeFloat(payload.minSpeed);
 				buf.writeFloat(payload.maxSpeed);
 				buf.writeFloat(payload.speedStep);
+				buf.writeBoolean(payload.flyPenalty);
 			},
 			buf -> new FlightStatePayload(
 					buf.readVarInt(),
@@ -41,7 +43,8 @@ public record FlightStatePayload(
 					buf.readBoolean(),
 					buf.readFloat(),
 					buf.readFloat(),
-					buf.readFloat()
+					buf.readFloat(),
+					buf.readBoolean()
 			)
 	);
 

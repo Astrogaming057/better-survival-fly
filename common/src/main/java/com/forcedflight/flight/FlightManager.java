@@ -379,8 +379,20 @@ public final class FlightManager {
 				announce,
 				config.minSpeed,
 				config.maxSpeed,
-				config.speedStep
+				config.speedStep,
+				config.flyPenalty
 		));
+	}
+
+	/** Sends the current config, including the mining penalty, to everyone online. */
+	public static void broadcastState() {
+		MinecraftServer current = server;
+		if (current == null) {
+			return;
+		}
+		for (ServerPlayer player : current.getPlayerList().getPlayers()) {
+			sendState(player, false);
+		}
 	}
 
 	private static boolean resyncDue(ServerPlayer player) {

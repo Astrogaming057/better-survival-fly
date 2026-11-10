@@ -16,6 +16,7 @@ public final class ClientFlightState {
 	public float minSpeed = 0.01f;
 	public float maxSpeed = ModConfig.DEFAULT_MAX_SPEED;
 	public float speedStep = 0.01f;
+	public boolean flyPenalty = true;
 	public int clientTicks;
 	public int hudUntilTick;
 
@@ -32,6 +33,7 @@ public final class ClientFlightState {
 		flying = false;
 		allowControl = false;
 		canToggle = false;
+		flyPenalty = true;
 		hudUntilTick = 0;
 	}
 
@@ -47,6 +49,7 @@ public final class ClientFlightState {
 		minSpeed = payload.minSpeed();
 		maxSpeed = payload.maxSpeed();
 		speedStep = payload.speedStep();
+		flyPenalty = payload.flyPenalty();
 		if (payload.announce() || wasAuthorized != authorized || Math.abs(previousSpeed - flySpeed) >= 0.0001f) {
 			bumpHud();
 		}

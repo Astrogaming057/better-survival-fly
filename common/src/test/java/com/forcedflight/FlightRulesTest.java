@@ -28,6 +28,20 @@ class FlightRulesTest {
 	}
 
 	@Test
+	void flyMiningPenaltyStaysForJumpingAndCreative() {
+		assertFalse(FlightPolicy.cancelFlyMiningPenalty(true, true, false, false));
+		assertFalse(FlightPolicy.cancelFlyMiningPenalty(false, true, true, false));
+		assertFalse(FlightPolicy.cancelFlyMiningPenalty(false, false, false, false));
+		assertFalse(FlightPolicy.cancelFlyMiningPenalty(false, true, false, true));
+		assertTrue(FlightPolicy.cancelFlyMiningPenalty(false, true, false, false));
+		assertFalse(FlightPolicy.cancelAuthorizedFallDamage(true, true, false, false));
+		assertFalse(FlightPolicy.cancelAuthorizedFallDamage(false, true, true, false));
+		assertFalse(FlightPolicy.cancelAuthorizedFallDamage(false, false, false, false));
+		assertFalse(FlightPolicy.cancelAuthorizedFallDamage(false, true, false, true));
+		assertTrue(FlightPolicy.cancelAuthorizedFallDamage(false, true, false, false));
+	}
+
+	@Test
 	void operatorCanEnableAndDisableOwnFlight() {
 		PlayerFlightRecord record = record(false, false, false);
 		assertTrue(FlightPolicy.canToggleSelf(true, false));
