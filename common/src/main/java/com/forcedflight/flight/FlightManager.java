@@ -25,6 +25,10 @@ import com.forcedflight.permission.PlayerFlightRecord;
  * Extra ability packets are sent only after a real change, and never more often than the configured cooldown.
  */
 public final class FlightManager {
+	public static final int TOGGLE_DENIED = 0;
+	public static final int TOGGLE_CHANGED = 1;
+	public static final int TOGGLE_VANILLA = 2;
+
 	private static final Set<UUID> ONLINE = ConcurrentHashMap.newKeySet();
 	private static final Set<UUID> JOIN_RESEND = ConcurrentHashMap.newKeySet();
 	private static final ConcurrentHashMap<UUID, Integer> LAST_RESYNC_TICK = new ConcurrentHashMap<>();
@@ -157,20 +161,51 @@ public final class FlightManager {
 		sendState(player, false);
 	}
 
-	public static boolean tryToggleFromClient(ServerPlayer player) {
+	public static int tryToggleFromClient(ServerPlayer player) {
 		if (!ModConfig.get().enabled) {
-			return false;
+			return TOGGLE_DENIED;
+		}
+		if (vanillaOwns(player)) {
+			return TOGGLE_VANILLA;
 		}
 		PlayerFlightRecord existing = FlightPermissionStore.get().get(player.getUUID()).orElse(null);
 		if (!FlightPolicy.canToggleSelf(isOperator(player), existing != null && existing.allowControl())) {
-			return false;
+			return TOGGLE_DENIED;
 		}
 		PlayerFlightRecord record = FlightPermissionStore.get().getOrCreate(player.getUUID(), ModConfig.get().defaultSpeed);
 		FlightPolicy.toggleAuthorization(record);
 		normalizeSpeed(record);
 		markOnline(player.getUUID(), record.authorized());
 		pushFlight(player, true);
-		return true;
+		return TOGGLE_CHANGED;
+	}
+
+	/**
+	 * Sets this player's saved flight speed from a HUD multiplier. Creative and spectator are left at vanilla speed.
+	 *
+	 * @return the raw speed stored, or {@link Float#NaN} when it was not applied
+	 */
+	public static float setOwnSpeed(ServerPlayer player, float multiplier) {
+		if (!ModConfig.get().enabled || !Float.isFinite(multiplier) || vanillaOwns(player)) {
+			return Float.NaN;
+		}
+		PlayerFlightRecord record = FlightPermissionStore.get().get(player.getUUID()).orElse(null);
+		if (record == null || !record.authorized()) {
+			return Float.NaN;
+		}
+		ModConfig config = ModConfig.get();
+		float clamped = FlightSpeed.clamp(multiplier * ForcedFlight.VANILLA_FLY_SPEED, config.minSpeed, config.maxSpeed);
+		record.setFlySpeed(clamped);
+		player.getAbilities().setFlyingSpeed(clamped);
+		FlightPermissionStore.get().markDirty();
+		sendState(player, false);
+		sendAbilities(player);
+		FlightPermissionStore.get().saveNow();
+		return clamped;
+	}
+
+	public static boolean usesVanillaFlight(ServerPlayer player) {
+		return vanillaOwns(player);
 	}
 
 	public static void trySetSpeed(ServerPlayer player, float requested) {
@@ -200,12 +235,12 @@ public final class FlightManager {
 		}
 		normalizeSpeed(record);
 		markOnline(player.getUUID(), record.authorized());
-		if (!vanillaOwns(player)) {
-			if (record.authorized()) {
-				write(player, FlightPolicy.reconcile(capture(player), record, false, suppressFlying(player)));
-			} else {
-				clearGrant(player);
-			}
+		if (vanillaOwns(player)) {
+			restoreVanillaFlySpeed(player);
+		} else if (record.authorized()) {
+			write(player, FlightPolicy.reconcile(capture(player), record, false, suppressFlying(player)));
+		} else {
+			clearGrant(player);
 		}
 		sendState(player, announce);
 		if (!vanillaOwns(player)) {
@@ -269,6 +304,15 @@ public final class FlightManager {
 		}
 		write(player, next);
 		return true;
+	}
+
+	private static void restoreVanillaFlySpeed(ServerPlayer player) {
+		Abilities abilities = player.getAbilities();
+		if (Math.abs(abilities.getFlyingSpeed() - ForcedFlight.VANILLA_FLY_SPEED) < 0.0001f) {
+			return;
+		}
+		abilities.setFlyingSpeed(ForcedFlight.VANILLA_FLY_SPEED);
+		sendAbilities(player);
 	}
 
 	private static void clearGrant(ServerPlayer player) {

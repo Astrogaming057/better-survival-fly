@@ -20,6 +20,10 @@ public final class FlightClientController {
 		return consumeScroll;
 	}
 
+	public static boolean usesVanillaFlight(LocalPlayer player) {
+		return vanillaOwns(player);
+	}
+
 	public static void applyServerState(FlightStatePayload payload, LocalPlayer player) {
 		ClientFlightState state = ClientFlightState.get();
 		boolean announce = payload.announce();
@@ -50,6 +54,10 @@ public final class FlightClientController {
 	}
 
 	public static void adjustFromScroll(double vertical) {
+		Minecraft client = Minecraft.getInstance();
+		if (client.player == null || vanillaOwns(client.player)) {
+			return;
+		}
 		ClientFlightState state = ClientFlightState.get();
 		if (!state.hasServerState || !state.authorized) {
 			return;
@@ -65,10 +73,7 @@ public final class FlightClientController {
 		}
 		state.flySpeed = next;
 		state.bumpHud();
-		Minecraft client = Minecraft.getInstance();
-		if (client.player != null && !vanillaOwns(client.player)) {
-			client.player.getAbilities().setFlyingSpeed(next);
-		}
+		client.player.getAbilities().setFlyingSpeed(next);
 		FlightRequests.sendSpeed(next);
 	}
 

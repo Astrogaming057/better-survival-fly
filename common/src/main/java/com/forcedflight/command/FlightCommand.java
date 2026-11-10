@@ -38,6 +38,10 @@ public final class FlightCommand {
 								.executes(context -> setJoinMessage(context, !ModConfig.get().joinMessage))
 								.then(Commands.literal("on").executes(context -> setJoinMessage(context, true)))
 								.then(Commands.literal("off").executes(context -> setJoinMessage(context, false))))
+						.then(Commands.literal("speed")
+								.executes(FlightCommand::showOwnSpeed)
+								.then(Commands.argument("multiplier", FloatArgumentType.floatArg(0.1f, 20.0f))
+										.executes(FlightCommand::setOwnSpeed)))
 						.then(Commands.literal("maxspeed").requires(FlightCommand::isAdmin)
 								.executes(FlightCommand::showMaxSpeed)
 								.then(Commands.argument("multiplier", FloatArgumentType.floatArg(0.1f, 20.0f))
@@ -66,6 +70,11 @@ public final class FlightCommand {
 			context.getSource().sendFailure(Component.literal("Only a player can toggle their own flight. Use /flight <player>."));
 			return 0;
 		}
+		if (FlightManager.usesVanillaFlight(player)) {
+			context.getSource().sendFailure(Component.literal(
+					"Forced Creative Flight is for survival only. Creative and spectator keep vanilla flight."));
+			return 0;
+		}
 		PlayerFlightRecord existing = FlightPermissionStore.get().get(player.getUUID()).orElse(null);
 		if (!FlightPolicy.canToggleSelf(FlightManager.isOperator(player), existing != null && existing.allowControl())) {
 			context.getSource().sendFailure(Component.literal("You do not have permission to toggle flight."));
@@ -83,6 +92,12 @@ public final class FlightCommand {
 			return 0;
 		}
 		ServerPlayer target = EntityArgument.getPlayer(context, "player");
+		PlayerFlightRecord existing = FlightPermissionStore.get().get(target.getUUID()).orElse(null);
+		if (FlightManager.usesVanillaFlight(target) && (existing == null || !existing.authorized())) {
+			context.getSource().sendFailure(Component.literal(
+					target.getName().getString() + " is in creative or spectator. This mod only enables flight in survival."));
+			return 0;
+		}
 		PlayerFlightRecord record = FlightManager.recordForEdit(target);
 		boolean enabled = FlightPolicy.toggleAuthorization(record);
 		FlightManager.pushFlight(target, true);
@@ -95,6 +110,11 @@ public final class FlightCommand {
 			return 0;
 		}
 		ServerPlayer target = EntityArgument.getPlayer(context, "player");
+		if (FlightManager.usesVanillaFlight(target)) {
+			context.getSource().sendFailure(Component.literal(
+					target.getName().getString() + " is in creative or spectator. This mod only enables flight in survival."));
+			return 0;
+		}
 		PlayerFlightRecord record = FlightManager.recordForEdit(target);
 		FlightPolicy.enableFlight(record);
 		FlightManager.pushFlight(target, true);
@@ -164,6 +184,55 @@ public final class FlightCommand {
 		feedback(context, saved
 				? "Join message enabled. Players will see the flight controls when they log in."
 				: "Join message disabled. Players will not see the flight controls when they log in.");
+		return Command.SINGLE_SUCCESS;
+	}
+
+	private static int showOwnSpeed(CommandContext<CommandSourceStack> context) {
+		ServerPlayer player = context.getSource().getPlayer();
+		if (player == null) {
+			context.getSource().sendFailure(Component.literal("Only a player can check their own flight speed."));
+			return 0;
+		}
+		if (FlightManager.usesVanillaFlight(player)) {
+			context.getSource().sendFailure(Component.literal(
+					"Creative and spectator use vanilla flight speed. This mod only changes speed in survival."));
+			return 0;
+		}
+		PlayerFlightRecord record = FlightPermissionStore.get().get(player.getUUID()).orElse(null);
+		float speed = record == null ? ModConfig.get().defaultSpeed : record.flySpeed();
+		feedback(context, String.format(Locale.ROOT,
+				"Your flight speed is %.2fx. The server cap is %.2fx. Set it with /flight speed <number>.",
+				FlightSpeed.multiplier(speed),
+				FlightSpeed.multiplier(ModConfig.get().maxSpeed)));
+		return Command.SINGLE_SUCCESS;
+	}
+
+	private static int setOwnSpeed(CommandContext<CommandSourceStack> context) {
+		if (!ensureEnabled(context)) {
+			return 0;
+		}
+		ServerPlayer player = context.getSource().getPlayer();
+		if (player == null) {
+			context.getSource().sendFailure(Component.literal("Only a player can set their own flight speed."));
+			return 0;
+		}
+		if (FlightManager.usesVanillaFlight(player)) {
+			context.getSource().sendFailure(Component.literal(
+					"Creative and spectator use vanilla flight speed. This mod only changes speed in survival."));
+			return 0;
+		}
+		PlayerFlightRecord record = FlightPermissionStore.get().get(player.getUUID()).orElse(null);
+		if (record == null || !record.authorized()) {
+			context.getSource().sendFailure(Component.literal("Turn flight on before setting a speed."));
+			return 0;
+		}
+		float multiplier = FloatArgumentType.getFloat(context, "multiplier");
+		float saved = FlightManager.setOwnSpeed(player, multiplier);
+		if (!Float.isFinite(saved)) {
+			context.getSource().sendFailure(Component.literal("Could not change flight speed."));
+			return 0;
+		}
+		feedback(context, String.format(Locale.ROOT, "Flight speed set to %.2fx.", FlightSpeed.multiplier(saved)));
 		return Command.SINGLE_SUCCESS;
 	}
 

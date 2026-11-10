@@ -60,9 +60,15 @@ public final class FlightClientHooks {
 			}
 		}
 		while (toggle.consumeClick()) {
-			if (client.screen == null && state.canToggle) {
-				FlightRequests.sendToggle();
+			if (client.screen != null || !state.canToggle) {
+				continue;
 			}
+			if (FlightClientController.usesVanillaFlight(client.player)) {
+				client.player.displayClientMessage(Component.literal(
+						"Forced Creative Flight is for survival only. Creative and spectator keep vanilla flight."), true);
+				continue;
+			}
+			FlightRequests.sendToggle();
 		}
 		FlightClientController.updateGate(client);
 	}

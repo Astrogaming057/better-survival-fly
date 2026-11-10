@@ -20,7 +20,8 @@ public final class FlightHud {
 			return;
 		}
 		Minecraft client = Minecraft.getInstance();
-		if (client.player == null || client.options.hideGui || client.level == null) {
+		if (client.player == null || client.options.hideGui || client.level == null
+				|| FlightClientController.usesVanillaFlight(client.player)) {
 			return;
 		}
 		ClientFlightState state = ClientFlightState.get();

@@ -12,7 +12,11 @@ public final class FlightRequests {
 
 	public static void handle(ServerPlayer player, FlightRequestPayload payload) {
 		if (payload.action() == FlightRequestPayload.TOGGLE) {
-			if (!FlightManager.tryToggleFromClient(player)) {
+			int result = FlightManager.tryToggleFromClient(player);
+			if (result == FlightManager.TOGGLE_VANILLA) {
+				player.sendSystemMessage(Component.literal(
+						"Forced Creative Flight is for survival only. Creative and spectator keep vanilla flight."), false);
+			} else if (result != FlightManager.TOGGLE_CHANGED) {
 				player.sendSystemMessage(Component.literal("You do not have permission to toggle flight."), false);
 			}
 			return;

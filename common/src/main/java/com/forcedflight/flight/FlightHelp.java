@@ -31,7 +31,7 @@ public final class FlightHelp {
 				"Double-tap jump to take off or land. Hold jump to rise, hold sneak to drop, and use WASD to move.")
 				.withStyle(ChatFormatting.GRAY), false);
 		player.sendSystemMessage(Component.literal(String.format(Locale.ROOT,
-				"Hold Alt and scroll to change speed. Scroll up is faster, scroll down is slower. The server cap is %.2fx. Operators change it with /flight maxspeed. The speed display fades a few seconds after you stop scrolling.",
+				"Hold Alt and scroll to change speed, or type /flight speed <number>. Scroll up is faster, scroll down is slower. The server cap is %.2fx. This stays off in creative and spectator. Operators change the cap with /flight maxspeed. The speed display fades a few seconds after you stop scrolling.",
 				max)).withStyle(ChatFormatting.GRAY), false);
 	}
 }
