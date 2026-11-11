@@ -70,6 +70,14 @@ public final class FlightRequests {
 			player.sendSystemMessage(Component.literal(enabled
 					? "Join message enabled."
 					: "Join message disabled."), false);
+			return;
+		}
+		if (payload.action() == FlightRequestPayload.SET_KEEP_FLYING) {
+			boolean enabled = ModConfig.saveKeepFlying(payload.flySpeed() >= 0.5f);
+			FlightManager.broadcastState();
+			player.sendSystemMessage(Component.literal(enabled
+					? "Keep flying enabled. Landing no longer cancels flight until you double-tap jump."
+					: "Keep flying disabled. Landing cancels flight like normal."), false);
 		}
 	}
 
@@ -95,6 +103,10 @@ public final class FlightRequests {
 
 	public static void sendJoinMessage(boolean enabled) {
 		send(FlightRequestPayload.SET_JOIN_MESSAGE, enabled ? 1f : 0f);
+	}
+
+	public static void sendKeepFlying(boolean enabled) {
+		send(FlightRequestPayload.SET_KEEP_FLYING, enabled ? 1f : 0f);
 	}
 
 	public static void handleMember(ServerPlayer operator, FlightMemberPayload payload) {

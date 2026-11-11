@@ -28,6 +28,14 @@ public final class FlightPolicy {
 		return !fallDamageEnabled && authorized && !flying && !vanillaOwns;
 	}
 
+	/**
+	 * When enabled, landing on the ground does not clear creative-style flying.
+	 * Double-tapping jump still turns flying off. Creative and spectator stay vanilla.
+	 */
+	public static boolean keepFlyingOnLand(boolean keepFlyingEnabled, boolean authorized, boolean vanillaOwns) {
+		return keepFlyingEnabled && authorized && !vanillaOwns;
+	}
+
 	public static boolean canToggleSelf(boolean operator, boolean allowControl) {
 		return operator || allowControl;
 	}

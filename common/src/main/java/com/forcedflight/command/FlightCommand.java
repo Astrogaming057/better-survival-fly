@@ -46,6 +46,10 @@ public final class FlightCommand {
 								.executes(context -> setJoinMessage(context, !ModConfig.get().joinMessage))
 								.then(Commands.literal("on").executes(context -> setJoinMessage(context, true)))
 								.then(Commands.literal("off").executes(context -> setJoinMessage(context, false))))
+						.then(Commands.literal("keepflying").requires(FlightCommand::isAdmin)
+								.executes(context -> setKeepFlying(context, !ModConfig.get().keepFlying))
+								.then(Commands.literal("on").executes(context -> setKeepFlying(context, true)))
+								.then(Commands.literal("off").executes(context -> setKeepFlying(context, false))))
 						.then(Commands.literal("speed")
 								.executes(FlightCommand::showOwnSpeed)
 								.then(Commands.argument("multiplier", FloatArgumentType.floatArg(0.1f, 20.0f))
@@ -209,6 +213,15 @@ public final class FlightCommand {
 		feedback(context, saved
 				? "Join message enabled. Players will see the flight controls when they log in."
 				: "Join message disabled. Players will not see the flight controls when they log in.");
+		return Command.SINGLE_SUCCESS;
+	}
+
+	private static int setKeepFlying(CommandContext<CommandSourceStack> context, boolean enabled) {
+		boolean saved = ModConfig.saveKeepFlying(enabled);
+		FlightManager.broadcastState();
+		feedback(context, saved
+				? "Keep flying enabled. Landing no longer cancels flight. Double-tap jump to stop flying."
+				: "Keep flying disabled. Landing cancels flight like normal.");
 		return Command.SINGLE_SUCCESS;
 	}
 

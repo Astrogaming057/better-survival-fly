@@ -44,7 +44,7 @@ public final class ForcedFlightNeoForge {
 		}
 
 		public static void registerPayloads(RegisterPayloadHandlersEvent event) {
-			PayloadRegistrar registrar = event.registrar("2");
+			PayloadRegistrar registrar = event.registrar("3");
 			registrar.playToServer(FlightRequestPayload.TYPE, FlightRequestPayload.STREAM_CODEC, (payload, context) ->
 					context.enqueueWork(() -> {
 						if (context.player() instanceof ServerPlayer player) {

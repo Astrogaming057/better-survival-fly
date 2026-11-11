@@ -20,6 +20,7 @@ public final class ClientFlightState {
 	public boolean operator;
 	public boolean fallDamage = true;
 	public boolean joinMessage = true;
+	public boolean keepFlying;
 	public int clientTicks;
 	public int hudUntilTick;
 
@@ -40,6 +41,7 @@ public final class ClientFlightState {
 		operator = false;
 		fallDamage = true;
 		joinMessage = true;
+		keepFlying = false;
 		hudUntilTick = 0;
 	}
 
@@ -59,6 +61,7 @@ public final class ClientFlightState {
 		operator = payload.operator();
 		fallDamage = payload.fallDamage();
 		joinMessage = payload.joinMessage();
+		keepFlying = payload.keepFlying();
 		if (payload.announce() || wasAuthorized != authorized || Math.abs(previousSpeed - flySpeed) >= 0.0001f) {
 			bumpHud();
 		}

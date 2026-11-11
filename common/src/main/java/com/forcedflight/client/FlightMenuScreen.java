@@ -184,6 +184,14 @@ public final class FlightMenuScreen extends Screen {
 			state.joinMessage = true;
 			rebuildWidgets();
 		}));
+		y += ROW;
+		addRenderableWidget(CycleButton.onOffBuilder(state.keepFlying)
+				.create(x, y, 190, 20, Component.literal("Keep flying on land"), (button, value) -> FlightRequests.sendKeepFlying(value)));
+		addRenderableWidget(resetButton(x + 194, y, () -> {
+			FlightRequests.sendKeepFlying(false);
+			state.keepFlying = false;
+			rebuildWidgets();
+		}));
 		hint = Component.literal("Server settings save immediately and apply to everyone.");
 	}
 

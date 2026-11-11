@@ -39,6 +39,10 @@ class FlightRulesTest {
 		assertFalse(FlightPolicy.cancelAuthorizedFallDamage(false, false, false, false));
 		assertFalse(FlightPolicy.cancelAuthorizedFallDamage(false, true, false, true));
 		assertTrue(FlightPolicy.cancelAuthorizedFallDamage(false, true, false, false));
+		assertFalse(FlightPolicy.keepFlyingOnLand(false, true, false));
+		assertFalse(FlightPolicy.keepFlyingOnLand(true, false, false));
+		assertFalse(FlightPolicy.keepFlyingOnLand(true, true, true));
+		assertTrue(FlightPolicy.keepFlyingOnLand(true, true, false));
 	}
 
 	@Test

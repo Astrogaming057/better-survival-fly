@@ -41,5 +41,9 @@ public final class FlightHelp {
 				? "Falling still hurts when flight is granted but toggled off. Operators can turn that off with /flight falldamage."
 				: "Falling does not hurt when flight is granted but toggled off. Operators can turn that back on with /flight falldamage.")
 				.withStyle(ChatFormatting.GRAY), false);
+		player.sendSystemMessage(Component.literal(ModConfig.get().keepFlying
+				? "Landing keeps you flying until you double-tap jump. Operators can turn that off with /flight keepflying."
+				: "Landing cancels flight like normal. Operators can keep flight after landing with /flight keepflying.")
+				.withStyle(ChatFormatting.GRAY), false);
 	}
 }

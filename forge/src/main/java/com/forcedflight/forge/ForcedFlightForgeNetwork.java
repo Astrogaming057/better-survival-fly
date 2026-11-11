@@ -19,7 +19,7 @@ import com.forcedflight.network.FlightStatePayload;
 public final class ForcedFlightForgeNetwork {
 	public static final Channel<CustomPacketPayload> CHANNEL = ChannelBuilder
 			.named(ResourceLocation.fromNamespaceAndPath(ForcedFlight.MOD_ID, "main"))
-			.networkProtocolVersion(2)
+			.networkProtocolVersion(3)
 			.payloadChannel()
 			.play()
 			.bidirectional()

@@ -12,6 +12,7 @@ public record FlightRequestPayload(int action, float flySpeed) implements Custom
 	public static final int SET_FLY_PENALTY = 4;
 	public static final int SET_FALL_DAMAGE = 5;
 	public static final int SET_JOIN_MESSAGE = 6;
+	public static final int SET_KEEP_FLYING = 7;
 	public static final Type<FlightRequestPayload> TYPE = new Type<>(ResourceLocation.fromNamespaceAndPath("forcedflight", "request"));
 	public static final StreamCodec<RegistryFriendlyByteBuf, FlightRequestPayload> STREAM_CODEC = StreamCodec.of(
 			(buf, payload) -> {

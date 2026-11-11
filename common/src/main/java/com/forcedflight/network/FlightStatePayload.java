@@ -19,7 +19,8 @@ public record FlightStatePayload(
 		boolean flyPenalty,
 		boolean operator,
 		boolean fallDamage,
-		boolean joinMessage
+		boolean joinMessage,
+		boolean keepFlying
 ) implements CustomPacketPayload {
 	public static final Type<FlightStatePayload> TYPE = new Type<>(ResourceLocation.fromNamespaceAndPath("forcedflight", "state"));
 	public static final StreamCodec<RegistryFriendlyByteBuf, FlightStatePayload> STREAM_CODEC = StreamCodec.of(
@@ -38,6 +39,7 @@ public record FlightStatePayload(
 				buf.writeBoolean(payload.operator);
 				buf.writeBoolean(payload.fallDamage);
 				buf.writeBoolean(payload.joinMessage);
+				buf.writeBoolean(payload.keepFlying);
 			},
 			buf -> new FlightStatePayload(
 					buf.readVarInt(),
@@ -50,6 +52,7 @@ public record FlightStatePayload(
 					buf.readFloat(),
 					buf.readFloat(),
 					buf.readFloat(),
+					buf.readBoolean(),
 					buf.readBoolean(),
 					buf.readBoolean(),
 					buf.readBoolean(),

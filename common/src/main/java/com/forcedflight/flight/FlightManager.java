@@ -383,7 +383,8 @@ public final class FlightManager {
 				config.flyPenalty,
 				isOperator(player),
 				config.fallDamage,
-				config.joinMessage
+				config.joinMessage,
+				config.keepFlying
 		));
 	}
 
