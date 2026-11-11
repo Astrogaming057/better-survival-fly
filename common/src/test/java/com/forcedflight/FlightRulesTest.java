@@ -162,6 +162,7 @@ class FlightRulesTest {
 		PlayerFlightRecord first = store.getOrCreate(steve, 0.05f);
 		FlightPolicy.enableFlight(first);
 		first.setAllowControl(true);
+		first.setKeepFlying(true);
 		first.setFlySpeed(0.07f);
 		PlayerFlightRecord second = store.getOrCreate(alex, 0.05f);
 		second.setAllowControl(true);
@@ -172,6 +173,7 @@ class FlightRulesTest {
 		assertTrue(loaded.authorized());
 		assertTrue(loaded.flying());
 		assertTrue(loaded.allowControl());
+		assertTrue(loaded.keepFlying());
 		assertEquals(0.07f, loaded.flySpeed(), 0.00001f);
 		assertEquals(steve, loaded.uuid());
 		PlayerFlightRecord other = reloaded.get(alex).orElseThrow();

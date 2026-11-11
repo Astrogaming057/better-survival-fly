@@ -160,6 +160,7 @@ public final class FlightPermissionStore {
 				record.setAuthorized(value.authorized);
 				record.setFlying(value.authorized && value.flying);
 				record.setAllowControl(value.allowControl);
+				record.setKeepFlying(value.keepFlying);
 				float speed = Float.isFinite(value.flySpeed) && value.flySpeed > 0f ? value.flySpeed : defaultSpeed;
 				record.setFlySpeed(FlightSpeed.clamp(speed, ForcedFlight.HARD_MIN_SPEED, ForcedFlight.HARD_MAX_SPEED));
 				players.put(uuid, record);
@@ -184,6 +185,7 @@ public final class FlightPermissionStore {
 		boolean authorized;
 		boolean flying;
 		boolean allowControl;
+		boolean keepFlying;
 		float flySpeed;
 
 		static Entry from(PlayerFlightRecord record) {
@@ -191,6 +193,7 @@ public final class FlightPermissionStore {
 			entry.authorized = record.authorized();
 			entry.flying = record.flying();
 			entry.allowControl = record.allowControl();
+			entry.keepFlying = record.keepFlying();
 			entry.flySpeed = record.flySpeed();
 			return entry;
 		}

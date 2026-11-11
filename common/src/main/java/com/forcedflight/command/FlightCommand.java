@@ -46,10 +46,10 @@ public final class FlightCommand {
 								.executes(context -> setJoinMessage(context, !ModConfig.get().joinMessage))
 								.then(Commands.literal("on").executes(context -> setJoinMessage(context, true)))
 								.then(Commands.literal("off").executes(context -> setJoinMessage(context, false))))
-						.then(Commands.literal("keepflying").requires(FlightCommand::isAdmin)
-								.executes(context -> setKeepFlying(context, !ModConfig.get().keepFlying))
-								.then(Commands.literal("on").executes(context -> setKeepFlying(context, true)))
-								.then(Commands.literal("off").executes(context -> setKeepFlying(context, false))))
+						.then(Commands.literal("keepflying")
+								.executes(context -> setOwnKeepFlying(context, null))
+								.then(Commands.literal("on").executes(context -> setOwnKeepFlying(context, true)))
+								.then(Commands.literal("off").executes(context -> setOwnKeepFlying(context, false))))
 						.then(Commands.literal("speed")
 								.executes(FlightCommand::showOwnSpeed)
 								.then(Commands.argument("multiplier", FloatArgumentType.floatArg(0.1f, 20.0f))
@@ -65,6 +65,10 @@ public final class FlightCommand {
 								.then(Commands.literal("off").executes(FlightCommand::disableOther))
 								.then(Commands.literal("allowcontrol").executes(FlightCommand::allowControl))
 								.then(Commands.literal("revokecontrol").executes(FlightCommand::revokeControl))
+								.then(Commands.literal("keepflying")
+										.executes(context -> setOtherKeepFlying(context, null))
+										.then(Commands.literal("on").executes(context -> setOtherKeepFlying(context, true)))
+										.then(Commands.literal("off").executes(context -> setOtherKeepFlying(context, false))))
 								.then(Commands.literal("status").executes(FlightCommand::status)))
 		);
 	}
@@ -176,14 +180,16 @@ public final class FlightCommand {
 		boolean authorized = record != null && record.authorized();
 		boolean flying = record != null && record.flying();
 		boolean control = record != null && record.allowControl();
+		boolean keepFlying = record != null && record.keepFlying();
 		float speed = record == null ? ModConfig.get().defaultSpeed : record.flySpeed();
 		String message = String.format(
 				Locale.ROOT,
-				"%s: authorization=%s, flying=%s, control=%s, speed=%.2fx (%.3f)",
+				"%s: authorization=%s, flying=%s, control=%s, keepflying=%s, speed=%.2fx (%.3f)",
 				target.getName().getString(),
 				authorized ? "on" : "off",
 				flying ? "yes" : "no",
 				control ? "allowcontrol" : "none",
+				keepFlying ? "on" : "off",
 				FlightSpeed.multiplier(speed),
 				speed
 		);
@@ -216,12 +222,35 @@ public final class FlightCommand {
 		return Command.SINGLE_SUCCESS;
 	}
 
-	private static int setKeepFlying(CommandContext<CommandSourceStack> context, boolean enabled) {
-		boolean saved = ModConfig.saveKeepFlying(enabled);
-		FlightManager.broadcastState();
+	private static int setOwnKeepFlying(CommandContext<CommandSourceStack> context, Boolean enabled) {
+		if (!ensureEnabled(context)) {
+			return 0;
+		}
+		ServerPlayer player = context.getSource().getPlayer();
+		if (player == null) {
+			context.getSource().sendFailure(Component.literal("Only a player can change their own keep-flying setting. Use /flight <player> keepflying."));
+			return 0;
+		}
+		PlayerFlightRecord record = FlightManager.recordForEdit(player);
+		boolean next = enabled == null ? !record.keepFlying() : enabled;
+		boolean saved = FlightManager.setKeepFlying(player, next);
 		feedback(context, saved
-				? "Keep flying enabled. Landing no longer cancels flight. Double-tap jump to stop flying."
-				: "Keep flying disabled. Landing cancels flight like normal.");
+				? "Keep flying enabled for you. Landing no longer cancels your flight. Double-tap jump to stop flying."
+				: "Keep flying disabled for you. Landing cancels your flight like normal.");
+		return Command.SINGLE_SUCCESS;
+	}
+
+	private static int setOtherKeepFlying(CommandContext<CommandSourceStack> context, Boolean enabled) throws CommandSyntaxException {
+		if (!ensureEnabled(context)) {
+			return 0;
+		}
+		ServerPlayer target = EntityArgument.getPlayer(context, "player");
+		PlayerFlightRecord record = FlightManager.recordForEdit(target);
+		boolean next = enabled == null ? !record.keepFlying() : enabled;
+		boolean saved = FlightManager.setKeepFlying(target, next);
+		feedback(context, saved
+				? "Keep flying enabled for " + target.getName().getString() + "."
+				: "Keep flying disabled for " + target.getName().getString() + ".");
 		return Command.SINGLE_SUCCESS;
 	}
 

@@ -10,6 +10,7 @@ public final class PlayerFlightRecord {
 	private boolean authorized;
 	private boolean flying;
 	private boolean allowControl;
+	private boolean keepFlying;
 	private float flySpeed;
 
 	public PlayerFlightRecord(UUID uuid, float flySpeed) {
@@ -45,6 +46,14 @@ public final class PlayerFlightRecord {
 		this.allowControl = allowControl;
 	}
 
+	public boolean keepFlying() {
+		return keepFlying;
+	}
+
+	public void setKeepFlying(boolean keepFlying) {
+		this.keepFlying = keepFlying;
+	}
+
 	public float flySpeed() {
 		return flySpeed;
 	}
@@ -58,6 +67,7 @@ public final class PlayerFlightRecord {
 		copy.authorized = authorized;
 		copy.flying = flying;
 		copy.allowControl = allowControl;
+		copy.keepFlying = keepFlying;
 		return copy;
 	}
 }

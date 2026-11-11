@@ -282,6 +282,14 @@ public final class FlightManager {
 		FlightPermissionStore.get().saveNow();
 	}
 
+	public static boolean setKeepFlying(ServerPlayer player, boolean enabled) {
+		PlayerFlightRecord record = recordForEdit(player);
+		record.setKeepFlying(enabled);
+		FlightPermissionStore.get().saveNow();
+		sendState(player, false);
+		return record.keepFlying();
+	}
+
 	public static PlayerFlightRecord recordForEdit(ServerPlayer player) {
 		PlayerFlightRecord record = FlightPermissionStore.get().getOrCreate(player.getUUID(), ModConfig.get().defaultSpeed);
 		normalizeSpeed(record);
@@ -384,7 +392,7 @@ public final class FlightManager {
 				isOperator(player),
 				config.fallDamage,
 				config.joinMessage,
-				config.keepFlying
+				record != null && record.keepFlying()
 		));
 	}
 

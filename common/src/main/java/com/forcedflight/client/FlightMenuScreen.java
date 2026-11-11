@@ -112,10 +112,21 @@ public final class FlightMenuScreen extends Screen {
 				state.flySpeed = ForcedFlight.VANILLA_FLY_SPEED;
 				rebuildWidgets();
 			}));
+			y += ROW;
 		}
+		addRenderableWidget(CycleButton.onOffBuilder(state.keepFlying)
+				.create(x, y, 190, 20, Component.literal("Keep flying on land"), (button, value) -> {
+					state.keepFlying = value;
+					FlightRequests.sendKeepFlying(value);
+				}));
+		addRenderableWidget(resetButton(x + 194, y, () -> {
+			FlightRequests.sendKeepFlying(false);
+			state.keepFlying = false;
+			rebuildWidgets();
+		}));
 		hint = Component.literal(vanilla
 				? "Creative and spectator keep vanilla flight."
-				: String.format(Locale.ROOT, "Server cap %.2fx. The speed slider unlocks while your flight is on.", FlightSpeed.multiplier(state.maxSpeed)));
+				: String.format(Locale.ROOT, "Server cap %.2fx. Keep flying is only for you.", FlightSpeed.multiplier(state.maxSpeed)));
 	}
 
 	private void initControls(int x, int y) {
@@ -182,14 +193,6 @@ public final class FlightMenuScreen extends Screen {
 		addRenderableWidget(resetButton(x + 194, y, () -> {
 			FlightRequests.sendJoinMessage(true);
 			state.joinMessage = true;
-			rebuildWidgets();
-		}));
-		y += ROW;
-		addRenderableWidget(CycleButton.onOffBuilder(state.keepFlying)
-				.create(x, y, 190, 20, Component.literal("Keep flying on land"), (button, value) -> FlightRequests.sendKeepFlying(value)));
-		addRenderableWidget(resetButton(x + 194, y, () -> {
-			FlightRequests.sendKeepFlying(false);
-			state.keepFlying = false;
 			rebuildWidgets();
 		}));
 		hint = Component.literal("Server settings save immediately and apply to everyone.");

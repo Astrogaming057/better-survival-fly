@@ -37,6 +37,13 @@ public final class FlightRequests {
 			FlightManager.trySetSpeed(player, payload.flySpeed());
 			return;
 		}
+		if (payload.action() == FlightRequestPayload.SET_KEEP_FLYING) {
+			boolean enabled = FlightManager.setKeepFlying(player, payload.flySpeed() >= 0.5f);
+			player.sendSystemMessage(Component.literal(enabled
+					? "Keep flying enabled for you. Landing no longer cancels your flight until you double-tap jump."
+					: "Keep flying disabled for you. Landing cancels your flight like normal."), false);
+			return;
+		}
 		if (!FlightManager.isOperator(player)) {
 			player.sendSystemMessage(Component.literal("Only operators can change flight server settings."), false);
 			return;
@@ -70,14 +77,6 @@ public final class FlightRequests {
 			player.sendSystemMessage(Component.literal(enabled
 					? "Join message enabled."
 					: "Join message disabled."), false);
-			return;
-		}
-		if (payload.action() == FlightRequestPayload.SET_KEEP_FLYING) {
-			boolean enabled = ModConfig.saveKeepFlying(payload.flySpeed() >= 0.5f);
-			FlightManager.broadcastState();
-			player.sendSystemMessage(Component.literal(enabled
-					? "Keep flying enabled. Landing no longer cancels flight until you double-tap jump."
-					: "Keep flying disabled. Landing cancels flight like normal."), false);
 		}
 	}
 

@@ -29,7 +29,6 @@ public final class ModConfig {
 	public final boolean joinMessage;
 	public final boolean flyPenalty;
 	public final boolean fallDamage;
-	public final boolean keepFlying;
 	public final int operatorLevel;
 	public final String defaultToggleKey;
 	public final float defaultSpeed;
@@ -53,7 +52,6 @@ public final class ModConfig {
 			boolean joinMessage,
 			boolean flyPenalty,
 			boolean fallDamage,
-			boolean keepFlying,
 			int operatorLevel,
 			String defaultToggleKey,
 			float defaultSpeed,
@@ -76,7 +74,6 @@ public final class ModConfig {
 		this.joinMessage = joinMessage;
 		this.flyPenalty = flyPenalty;
 		this.fallDamage = fallDamage;
-		this.keepFlying = keepFlying;
 		this.operatorLevel = operatorLevel;
 		this.defaultToggleKey = defaultToggleKey;
 		this.defaultSpeed = defaultSpeed;
@@ -111,7 +108,6 @@ public final class ModConfig {
 				true,
 				true,
 				true,
-				false,
 				2,
 				"I",
 				FlightSpeed.clamp(ForcedFlight.VANILLA_FLY_SPEED, min, max),
@@ -180,40 +176,7 @@ public final class ModConfig {
 		return current.joinMessage;
 	}
 
-	public static boolean saveKeepFlying(boolean enabled) {
-		current = current.withKeepFlying(enabled);
-		if (ForcedFlightServices.configFile != null) {
-			write(ForcedFlightServices.configFile, current);
-		}
-		return current.keepFlying;
-	}
 
-	public ModConfig withKeepFlying(boolean enabled) {
-		return new ModConfig(
-				this.enabled,
-				joinMessage,
-				flyPenalty,
-				fallDamage,
-				enabled,
-				operatorLevel,
-				defaultToggleKey,
-				defaultSpeed,
-				minSpeed,
-				maxSpeed,
-				speedStep,
-				hudEnabled,
-				hudAnchor,
-				hudOffsetX,
-				hudOffsetY,
-				hudDurationTicks,
-				hudShowWhileFlying,
-				enforcementEnabled,
-				enforcementResync,
-				resyncCooldownTicks,
-				bootstrapAuthorized,
-				bootstrapAllowControl
-		);
-	}
 
 	public ModConfig withJoinMessage(boolean enabled) {
 		return new ModConfig(
@@ -221,7 +184,6 @@ public final class ModConfig {
 				enabled,
 				flyPenalty,
 				fallDamage,
-				keepFlying,
 				operatorLevel,
 				defaultToggleKey,
 				defaultSpeed,
@@ -256,7 +218,6 @@ public final class ModConfig {
 				joinMessage,
 				flyPenalty,
 				enabled,
-				keepFlying,
 				operatorLevel,
 				defaultToggleKey,
 				defaultSpeed,
@@ -291,7 +252,6 @@ public final class ModConfig {
 				joinMessage,
 				enabled,
 				fallDamage,
-				keepFlying,
 				operatorLevel,
 				defaultToggleKey,
 				defaultSpeed,
@@ -327,7 +287,6 @@ public final class ModConfig {
 				joinMessage,
 				flyPenalty,
 				fallDamage,
-				keepFlying,
 				operatorLevel,
 				defaultToggleKey,
 				FlightSpeed.clamp(defaultSpeed, minSpeed, max),
@@ -398,7 +357,6 @@ public final class ModConfig {
 				boolOf(root, "joinMessage", base.joinMessage),
 				boolOf(root, "flyPenalty", base.flyPenalty),
 				boolOf(root, "fallDamage", base.fallDamage),
-				boolOf(root, "keepFlying", base.keepFlying),
 				operatorLevel,
 				key.trim(),
 				fallback,
@@ -451,7 +409,6 @@ public final class ModConfig {
 		root.addProperty("joinMessage", config.joinMessage);
 		root.addProperty("flyPenalty", config.flyPenalty);
 		root.addProperty("fallDamage", config.fallDamage);
-		root.addProperty("keepFlying", config.keepFlying);
 		root.addProperty("operatorLevel", config.operatorLevel);
 		root.addProperty("defaultToggleKey", config.defaultToggleKey);
 		JsonObject flight = new JsonObject();

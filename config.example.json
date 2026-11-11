@@ -4,7 +4,6 @@
   "joinMessage": true,
   "flyPenalty": true,
   "fallDamage": true,
-  "keepFlying": false,
   "operatorLevel": 2,
   "defaultToggleKey": "I",
   "flight": {
