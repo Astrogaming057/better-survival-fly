@@ -93,6 +93,14 @@ public final class FlightManager {
 		FlightPermissionStore.get().saveNow();
 	}
 
+	/** Called after vanilla op/deop updates the player's permission level. */
+	public static void onPermissionLevelChanged(ServerPlayer player) {
+		if (player.connection == null) {
+			return;
+		}
+		sendState(player, false);
+	}
+
 	public static void onRespawn(ServerPlayer player) {
 		PlayerFlightRecord record = FlightPermissionStore.get().get(player.getUUID()).orElse(null);
 		if (record != null && record.authorized()) {
