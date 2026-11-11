@@ -11,7 +11,8 @@
     "ServerPlayerCopyMixin",
     "ServerGamePacketListenerImplMixin",
     "ServerPlayerGameModeMixin",
-    "ClientboundPlayerAbilitiesPacketMixin"
+    "ClientboundPlayerAbilitiesPacketMixin",
+    "PlayerListMixin"
   ],
   "client": [
     "LocalPlayerMixin",

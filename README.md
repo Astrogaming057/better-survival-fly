@@ -1,6 +1,6 @@
 # Forced Creative Flight
 
-Minecraft **1.21.1** mod, version **1.2.5**, for Fabric, NeoForge, and Forge. It gives authorized players vanilla Creative flight while they stay in Survival. Health, hunger, inventory, armor, damage, death, experience, and block and entity interaction are unchanged. The mod never switches the player's game mode.
+Minecraft **1.21.1** mod, version **1.2.6**, for Fabric, NeoForge, and Forge. It gives authorized players vanilla Creative flight while they stay in Survival. Health, hunger, inventory, armor, damage, death, experience, and block and entity interaction are unchanged. The mod never switches the player's game mode.
 
 The server decides who may fly. The client sends toggle and speed requests, then applies the state the server confirms.
 
@@ -81,17 +81,17 @@ $env:JAVA_HOME = "C:\path\to\jdk-21"
 
 | Loader | Jar |
 | --- | --- |
-| Fabric | `fabric/build/libs/forcedflight-fabric-1.2.5.jar` |
-| NeoForge | `neoforge/build/libs/forcedflight-neoforge-1.2.5.jar` |
-| Forge | `forge/build/libs/forcedflight-forge-1.2.5.jar` |
+| Fabric | `fabric/build/libs/forcedflight-fabric-1.2.6.jar` |
+| NeoForge | `neoforge/build/libs/forcedflight-neoforge-1.2.6.jar` |
+| Forge | `forge/build/libs/forcedflight-forge-1.2.6.jar` |
 
 ## Install
 
 Use the jar that matches the loader. The client and the server must use the same one. A Fabric jar does not load on NeoForge or Forge, and the three jars cannot be mixed.
 
-1. NeoForge 1.21.1: put `forcedflight-neoforge-1.2.5.jar` in the server `mods` folder and in the NeoForge client's `mods` folder.
-2. Forge 1.21.1: put `forcedflight-forge-1.2.5.jar` in both Forge `mods` folders.
-3. Fabric 1.21.1: install Fabric Loader and Fabric API, then put `forcedflight-fabric-1.2.5.jar` in both Fabric `mods` folders.
+1. NeoForge 1.21.1: put `forcedflight-neoforge-1.2.6.jar` in the server `mods` folder and in the NeoForge client's `mods` folder.
+2. Forge 1.21.1: put `forcedflight-forge-1.2.6.jar` in both Forge `mods` folders.
+3. Fabric 1.21.1: install Fabric Loader and Fabric API, then put `forcedflight-fabric-1.2.6.jar` in both Fabric `mods` folders.
 
 The client alone cannot grant flight. Restart the server after copying the jar. On join, chat explains the controls: `I` or `/flight` toggles permission, double-tap jump takes off, and Alt plus scroll changes speed. `/flight` is absent until that server has the matching jar.
 
