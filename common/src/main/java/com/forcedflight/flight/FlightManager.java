@@ -380,7 +380,10 @@ public final class FlightManager {
 				config.minSpeed,
 				config.maxSpeed,
 				config.speedStep,
-				config.flyPenalty
+				config.flyPenalty,
+				isOperator(player),
+				config.fallDamage,
+				config.joinMessage
 		));
 	}
 

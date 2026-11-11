@@ -1,6 +1,6 @@
 # Forced Creative Flight
 
-Minecraft **1.21.1** mod, version **1.1.2**, for Fabric, NeoForge, and Forge. It gives authorized players vanilla Creative flight while they stay in Survival. Health, hunger, inventory, armor, damage, death, experience, and block and entity interaction are unchanged. The mod never switches the player's game mode.
+Minecraft **1.21.1** mod, version **1.2.3**, for Fabric, NeoForge, and Forge. It gives authorized players vanilla Creative flight while they stay in Survival. Health, hunger, inventory, armor, damage, death, experience, and block and entity interaction are unchanged. The mod never switches the player's game mode.
 
 The server decides who may fly. The client sends toggle and speed requests, then applies the state the server confirms.
 
@@ -13,7 +13,8 @@ While the server has authorized a Survival or Adventure player:
 - Double-tap jump starts and stops airborne flight, the same way Creative does.
 - Hold jump to ascend, hold sneak to descend, and use WASD relative to the camera.
 - The player can hover. Vanilla flight acceleration, sprint boost, and collision stay in charge.
-- Hold Alt and scroll to change flight speed, or use `/flight speed <number>` when that scroll does not work. Scroll up is faster, scroll down is slower. A plain scroll still moves the hotbar. The number uses the same units as the HUD, so `5` means `5.00x`.
+- Hold the speed key and scroll to change flight speed, or switch to up and down keys from the Flight button in the pause menu. `/flight speed <number>` still works. Scroll up is faster, scroll down is slower. A plain scroll still moves the hotbar. The number uses the same units as the HUD, so `5` means `5.00x`.
+- The pause menu Flight button also changes the toggle key and, for operators, the server cap, mining slowdown, fall damage, and join message.
 - Creative and spectator keep vanilla flight. The mod will not enable itself or change speed in those modes.
 - Breaking blocks while flying is slower, the same as any time you are off the ground. `/flight flypenalty off` removes that slowdown while flying. Jumping still uses the vanilla slowdown.
 - Falling still hurts when flight is granted but not currently toggled on. `/flight falldamage off` removes that damage. Creative and spectator stay vanilla.
@@ -80,17 +81,17 @@ $env:JAVA_HOME = "C:\path\to\jdk-21"
 
 | Loader | Jar |
 | --- | --- |
-| Fabric | `fabric/build/libs/forcedflight-fabric-1.1.2.jar` |
-| NeoForge | `neoforge/build/libs/forcedflight-neoforge-1.1.2.jar` |
-| Forge | `forge/build/libs/forcedflight-forge-1.1.2.jar` |
+| Fabric | `fabric/build/libs/forcedflight-fabric-1.2.3.jar` |
+| NeoForge | `neoforge/build/libs/forcedflight-neoforge-1.2.3.jar` |
+| Forge | `forge/build/libs/forcedflight-forge-1.2.3.jar` |
 
 ## Install
 
 Use the jar that matches the loader. The client and the server must use the same one. A Fabric jar does not load on NeoForge or Forge, and the three jars cannot be mixed.
 
-1. NeoForge 1.21.1: put `forcedflight-neoforge-1.1.2.jar` in the server `mods` folder and in the NeoForge client's `mods` folder.
-2. Forge 1.21.1: put `forcedflight-forge-1.1.2.jar` in both Forge `mods` folders.
-3. Fabric 1.21.1: install Fabric Loader and Fabric API, then put `forcedflight-fabric-1.1.2.jar` in both Fabric `mods` folders.
+1. NeoForge 1.21.1: put `forcedflight-neoforge-1.2.3.jar` in the server `mods` folder and in the NeoForge client's `mods` folder.
+2. Forge 1.21.1: put `forcedflight-forge-1.2.3.jar` in both Forge `mods` folders.
+3. Fabric 1.21.1: install Fabric Loader and Fabric API, then put `forcedflight-fabric-1.2.3.jar` in both Fabric `mods` folders.
 
 The client alone cannot grant flight. Restart the server after copying the jar. On join, chat explains the controls: `I` or `/flight` toggles permission, double-tap jump takes off, and Alt plus scroll changes speed. `/flight` is absent until that server has the matching jar.
 

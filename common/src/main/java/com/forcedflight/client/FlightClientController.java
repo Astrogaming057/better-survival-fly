@@ -100,7 +100,8 @@ public final class FlightClientController {
 			ClientFlightState state = ClientFlightState.get();
 			gate = state.hasServerState
 					&& state.authorized
-					&& !vanillaOwns(client.player);
+					&& !vanillaOwns(client.player)
+					&& ClientPreferences.mode() == ClientPreferences.SpeedMode.SCROLL;
 		}
 		consumeScroll = gate;
 	}

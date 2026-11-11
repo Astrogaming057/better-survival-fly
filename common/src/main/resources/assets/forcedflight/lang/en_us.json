@@ -1,4 +1,7 @@
 {
   "key.forcedflight.toggle": "Toggle Flight",
+  "key.forcedflight.speed_modifier": "Speed Modifier",
+  "key.forcedflight.speed_up": "Speed Up",
+  "key.forcedflight.speed_down": "Speed Down",
   "category.forcedflight": "Forced Creative Flight"
 }

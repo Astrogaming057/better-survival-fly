@@ -31,7 +31,7 @@ public final class FlightHelp {
 				"Double-tap jump to take off or land. Hold jump to rise, hold sneak to drop, and use WASD to move.")
 				.withStyle(ChatFormatting.GRAY), false);
 		player.sendSystemMessage(Component.literal(String.format(Locale.ROOT,
-				"Hold Alt and scroll to change speed, or type /flight speed <number>. Scroll up is faster, scroll down is slower. The server cap is %.2fx. This stays off in creative and spectator. Operators change the cap with /flight maxspeed. The speed display fades a few seconds after you stop scrolling.",
+				"Change speed from Flight in the pause menu, with /flight speed <number>, or with the speed keys. Hold the speed key and scroll by default. Scroll up is faster and scroll down is slower. The server cap is %.2fx. This stays off in creative and spectator.",
 				max)).withStyle(ChatFormatting.GRAY), false);
 		player.sendSystemMessage(Component.literal(ModConfig.get().flyPenalty
 				? "Breaking blocks while flying is slower. Operators can turn that off with /flight flypenalty."

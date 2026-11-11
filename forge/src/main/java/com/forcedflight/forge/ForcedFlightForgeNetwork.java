@@ -10,19 +10,23 @@ import net.minecraftforge.network.PacketDistributor;
 
 import com.forcedflight.ForcedFlight;
 import com.forcedflight.ForcedFlightServices;
+import com.forcedflight.network.FlightMemberPayload;
 import com.forcedflight.network.FlightRequestPayload;
 import com.forcedflight.network.FlightRequests;
+import com.forcedflight.network.FlightRosterPayload;
 import com.forcedflight.network.FlightStatePayload;
 
 public final class ForcedFlightForgeNetwork {
 	public static final Channel<CustomPacketPayload> CHANNEL = ChannelBuilder
 			.named(ResourceLocation.fromNamespaceAndPath(ForcedFlight.MOD_ID, "main"))
-			.networkProtocolVersion(1)
+			.networkProtocolVersion(2)
 			.payloadChannel()
 			.play()
 			.bidirectional()
 			.addMain(FlightRequestPayload.TYPE, FlightRequestPayload.STREAM_CODEC, ForcedFlightForgeNetwork::onRequest)
 			.addMain(FlightStatePayload.TYPE, FlightStatePayload.STREAM_CODEC, ForcedFlightForgeNetwork::onState)
+			.addMain(FlightMemberPayload.TYPE, FlightMemberPayload.STREAM_CODEC, ForcedFlightForgeNetwork::onMember)
+			.addMain(FlightRosterPayload.TYPE, FlightRosterPayload.STREAM_CODEC, ForcedFlightForgeNetwork::onRoster)
 			.build();
 
 	private ForcedFlightForgeNetwork() {
@@ -36,11 +40,38 @@ public final class ForcedFlightForgeNetwork {
 		CHANNEL.send(payload, PacketDistributor.SERVER.noArg());
 	}
 
+	public static void sendRoster(ServerPlayer player, FlightRosterPayload payload) {
+		CHANNEL.send(payload, PacketDistributor.PLAYER.with(player));
+	}
+
+	public static void sendMember(FlightMemberPayload payload) {
+		CHANNEL.send(payload, PacketDistributor.SERVER.noArg());
+	}
+
 	private static void onRequest(FlightRequestPayload payload, CustomPayloadEvent.Context context) {
 		context.enqueueWork(() -> {
 			ServerPlayer player = context.getSender();
 			if (player != null) {
 				FlightRequests.handle(player, payload);
+			}
+		});
+		context.setPacketHandled(true);
+	}
+
+	private static void onMember(FlightMemberPayload payload, CustomPayloadEvent.Context context) {
+		context.enqueueWork(() -> {
+			ServerPlayer player = context.getSender();
+			if (player != null) {
+				FlightRequests.handleMember(player, payload);
+			}
+		});
+		context.setPacketHandled(true);
+	}
+
+	private static void onRoster(FlightRosterPayload payload, CustomPayloadEvent.Context context) {
+		context.enqueueWork(() -> {
+			if (ForcedFlightServices.acceptRoster != null) {
+				ForcedFlightServices.acceptRoster.accept(payload);
 			}
 		});
 		context.setPacketHandled(true);

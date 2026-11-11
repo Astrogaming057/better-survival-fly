@@ -16,8 +16,10 @@ import com.forcedflight.ForcedFlightBootstrap;
 import com.forcedflight.ForcedFlightServices;
 import com.forcedflight.command.FlightCommand;
 import com.forcedflight.flight.FlightManager;
+import com.forcedflight.network.FlightMemberPayload;
 import com.forcedflight.network.FlightRequestPayload;
 import com.forcedflight.network.FlightRequests;
+import com.forcedflight.network.FlightRosterPayload;
 import com.forcedflight.network.FlightStatePayload;
 import com.forcedflight.permission.FlightPermissionStore;
 
@@ -26,11 +28,16 @@ public final class ForcedFlightFabric implements ModInitializer {
 	public void onInitialize() {
 		ForcedFlightServices.use(FabricLoader.getInstance().getConfigDir().resolve(ForcedFlight.MOD_ID));
 		ForcedFlightServices.sendState = ServerPlayNetworking::send;
+		ForcedFlightServices.sendRoster = ServerPlayNetworking::send;
 		ForcedFlightBootstrap.init();
 		PayloadTypeRegistry.playC2S().register(FlightRequestPayload.TYPE, FlightRequestPayload.STREAM_CODEC);
 		PayloadTypeRegistry.playS2C().register(FlightStatePayload.TYPE, FlightStatePayload.STREAM_CODEC);
+		PayloadTypeRegistry.playC2S().register(FlightMemberPayload.TYPE, FlightMemberPayload.STREAM_CODEC);
+		PayloadTypeRegistry.playS2C().register(FlightRosterPayload.TYPE, FlightRosterPayload.STREAM_CODEC);
 		ServerPlayNetworking.registerGlobalReceiver(FlightRequestPayload.TYPE, (payload, context) ->
 				FlightRequests.handle(context.player(), payload));
+		ServerPlayNetworking.registerGlobalReceiver(FlightMemberPayload.TYPE, (payload, context) ->
+				FlightRequests.handleMember(context.player(), payload));
 		CommandRegistrationCallback.EVENT.register((dispatcher, registry, environment) -> FlightCommand.register(dispatcher));
 		ServerLifecycleEvents.SERVER_STARTED.register(FlightManager::bindServer);
 		ServerLifecycleEvents.SERVER_STOPPING.register(server -> FlightPermissionStore.get().saveNow());

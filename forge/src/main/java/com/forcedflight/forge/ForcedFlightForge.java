@@ -23,6 +23,7 @@ public final class ForcedFlightForge {
 	public ForcedFlightForge() {
 		ForcedFlightServices.use(FMLPaths.CONFIGDIR.get().resolve(ForcedFlight.MOD_ID));
 		ForcedFlightServices.sendState = ForcedFlightForgeNetwork::sendToPlayer;
+		ForcedFlightServices.sendRoster = ForcedFlightForgeNetwork::sendRoster;
 		ForcedFlightBootstrap.init();
 	}
 

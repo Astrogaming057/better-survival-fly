@@ -8,7 +8,9 @@ import java.util.function.Predicate;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 
+import com.forcedflight.network.FlightMemberPayload;
 import com.forcedflight.network.FlightRequestPayload;
+import com.forcedflight.network.FlightRosterPayload;
 import com.forcedflight.network.FlightStatePayload;
 
 /**
@@ -21,6 +23,9 @@ public final class ForcedFlightServices {
 	public static BiConsumer<ServerPlayer, FlightStatePayload> sendState;
 	public static Consumer<FlightRequestPayload> sendRequest;
 	public static Consumer<FlightStatePayload> acceptClientState;
+	public static BiConsumer<ServerPlayer, FlightRosterPayload> sendRoster;
+	public static Consumer<FlightMemberPayload> sendMember;
+	public static Consumer<FlightRosterPayload> acceptRoster;
 	/** Set by the client. Dedicated servers leave this empty and decide from the server player. */
 	public static Predicate<Player> cancelClientFlyPenalty;
 

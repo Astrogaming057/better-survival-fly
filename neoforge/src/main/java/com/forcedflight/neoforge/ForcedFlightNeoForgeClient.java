@@ -22,6 +22,7 @@ public final class ForcedFlightNeoForgeClient {
 		FlightClientController.installMiningHook();
 		ForcedFlightServices.acceptClientState = payload ->
 				FlightClientController.applyServerState(payload, Minecraft.getInstance().player);
+		ForcedFlightServices.acceptRoster = com.forcedflight.client.ClientRoster::apply;
 	}
 
 	private ForcedFlightNeoForgeClient() {
@@ -30,8 +31,14 @@ public final class ForcedFlightNeoForgeClient {
 	@SubscribeEvent
 	public static void keys(RegisterKeyMappingsEvent event) {
 		ForcedFlightServices.sendRequest = PacketDistributor::sendToServer;
+		ForcedFlightServices.sendMember = PacketDistributor::sendToServer;
 		FlightClientHooks.toggle = FlightClientHooks.createToggle();
+		FlightClientHooks.createSpeedKeys();
 		event.register(FlightClientHooks.toggle);
+		event.register(FlightClientHooks.speedModifier);
+		event.register(FlightClientHooks.speedUp);
+		event.register(FlightClientHooks.speedDown);
+		com.forcedflight.client.ClientPreferences.load();
 	}
 }
 

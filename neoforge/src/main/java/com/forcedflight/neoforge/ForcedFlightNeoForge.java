@@ -21,8 +21,10 @@ import com.forcedflight.ForcedFlightBootstrap;
 import com.forcedflight.ForcedFlightServices;
 import com.forcedflight.command.FlightCommand;
 import com.forcedflight.flight.FlightManager;
+import com.forcedflight.network.FlightMemberPayload;
 import com.forcedflight.network.FlightRequestPayload;
 import com.forcedflight.network.FlightRequests;
+import com.forcedflight.network.FlightRosterPayload;
 import com.forcedflight.network.FlightStatePayload;
 import com.forcedflight.permission.FlightPermissionStore;
 
@@ -31,6 +33,7 @@ public final class ForcedFlightNeoForge {
 	public ForcedFlightNeoForge(IEventBus modBus) {
 		ForcedFlightServices.use(FMLPaths.CONFIGDIR.get().resolve(ForcedFlight.MOD_ID));
 		ForcedFlightServices.sendState = PacketDistributor::sendToPlayer;
+		ForcedFlightServices.sendRoster = PacketDistributor::sendToPlayer;
 		ForcedFlightBootstrap.init();
 		modBus.addListener(Events::registerPayloads);
 	}
@@ -41,7 +44,7 @@ public final class ForcedFlightNeoForge {
 		}
 
 		public static void registerPayloads(RegisterPayloadHandlersEvent event) {
-			PayloadRegistrar registrar = event.registrar("1");
+			PayloadRegistrar registrar = event.registrar("2");
 			registrar.playToServer(FlightRequestPayload.TYPE, FlightRequestPayload.STREAM_CODEC, (payload, context) ->
 					context.enqueueWork(() -> {
 						if (context.player() instanceof ServerPlayer player) {
@@ -52,6 +55,18 @@ public final class ForcedFlightNeoForge {
 					context.enqueueWork(() -> {
 						if (ForcedFlightServices.acceptClientState != null) {
 							ForcedFlightServices.acceptClientState.accept(payload);
+						}
+					}));
+			registrar.playToServer(FlightMemberPayload.TYPE, FlightMemberPayload.STREAM_CODEC, (payload, context) ->
+					context.enqueueWork(() -> {
+						if (context.player() instanceof ServerPlayer player) {
+							FlightRequests.handleMember(player, payload);
+						}
+					}));
+			registrar.playToClient(FlightRosterPayload.TYPE, FlightRosterPayload.STREAM_CODEC, (payload, context) ->
+					context.enqueueWork(() -> {
+						if (ForcedFlightServices.acceptRoster != null) {
+							ForcedFlightServices.acceptRoster.accept(payload);
 						}
 					}));
 		}
