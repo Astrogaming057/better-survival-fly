@@ -1,0 +1,29 @@
+modLoader = "javafml"
+loaderVersion = "${loader_range}"
+license = "MIT"
+
+[[mods]]
+modId = "forcedflight"
+version = "${version}"
+displayName = "Forced Creative Flight"
+authors = "Forced Flight"
+description = '''
+Creative-style flight for authorized survival players. The server stays in charge.
+'''
+
+[[dependencies.forcedflight]]
+modId = "forge"
+mandatory = true
+versionRange = "${loader_range}"
+ordering = "NONE"
+side = "BOTH"
+
+[[dependencies.forcedflight]]
+modId = "minecraft"
+mandatory = true
+versionRange = "${mc_range}"
+ordering = "NONE"
+side = "BOTH"
+
+[[mixins]]
+config = "forcedflight.mixins.json"

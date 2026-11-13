@@ -1,6 +1,8 @@
 # Forced Creative Flight
 
-Minecraft **1.21.1** mod, version **1.2.6**, for Fabric, NeoForge, and Forge. It gives authorized players vanilla Creative flight while they stay in Survival. Health, hunger, inventory, armor, damage, death, experience, and block and entity interaction are unchanged. The mod never switches the player's game mode.
+Minecraft mod, version **1.2.7**, for Fabric, NeoForge, and Forge. It gives authorized players vanilla Creative flight while they stay in Survival. Health, hunger, inventory, armor, damage, death, experience, and block and entity interaction are unchanged. The mod never switches the player's game mode.
+
+Each Minecraft version is its own jar. Fabric covers 1.18.2 through 1.21.11 and the 26.1–26.3 releases. Forge covers those same versions except 1.21.2, which has no Forge build. NeoForge starts at 1.20.2. A jar built for one version does not load on another.
 
 The server decides who may fly. The client sends toggle and speed requests, then applies the state the server confirms.
 
@@ -34,11 +36,11 @@ Three separate values are stored per UUID:
 | Flying | They are currently airborne. |
 | Independent control (`allowcontrol`) | They may turn their own authorization on or off. |
 
-Operators (permission level 2 by default) can change every value for any online player and can always toggle themselves. A player with `allowcontrol` can toggle only themselves, with `/flight`, `/flight self`, or `I`. Anyone else cannot turn flight on, and a client packet cannot grant it.
+Operators (permission level 2 by default) can change every value for any online player and can always toggle themselves. The host of a singleplayer world has those same controls even when cheats are off, so `/flight` and the pause-menu Server tab work without OP. Dedicated-server players and anyone who joins a LAN world still need operator permission; the host check is vanilla `isHost` and dedicated servers always fail it. A player with `allowcontrol` can toggle only themselves, with `/flight`, `/flight self`, or `I`. Anyone else cannot turn flight on, and a client packet cannot grant it.
 
 ## Commands
 
-All of these are checked on the server.
+All of these are checked on the server. In the tables below, Operator also includes the singleplayer world host. Dedicated servers and LAN guests are not included.
 
 | Command | Who | Effect |
 | --- | --- | --- |
@@ -67,31 +69,45 @@ All of these are checked on the server.
 
 Targets must be online. Permissions themselves are stored by UUID, so a later username change still matches.
 
+## Supported versions
+
+| Minecraft | Fabric | Forge | NeoForge | Java |
+| --- | --- | --- | --- | --- |
+| 1.18.2, 1.19.2, 1.19.4, 1.20, 1.20.1 | yes | yes | no | 17 |
+| 1.20.2, 1.20.4 | yes | yes | yes | 17 |
+| 1.20.6, 1.21, 1.21.1, 1.21.3–1.21.11 | yes | yes | yes | 21 |
+| 1.21.2 | yes | no | yes | 21 |
+| 26.1, 26.1.1, 26.1.2, 26.2, 26.3 | yes | yes | yes | 25 |
+
+Forge 26.x jars compile against the Forge libraries. That loader still ships Mixin 0.8.7, which stops at Java 21, so load one of those jars in a Forge 26 client before treating it as ready. Fabric and NeoForge 26.x use a Mixin build that accepts Java 25.
+
 ## Build
 
-Requirements: JDK 21, and an internet connection the first time Gradle downloads Minecraft.
+Requirements: JDK 21 for 1.18.2 through 1.21.11, JDK 25 for 26.1 and later, and an internet connection the first time Gradle downloads Minecraft. Point `JAVA_HOME` at JDK 25 when a build includes any 26.x project. JDK 21 can compile the older versions on its own.
 
 ```powershell
 cd forced-flight
-$env:JAVA_HOME = "C:\path\to\jdk-21"
-.\gradlew.bat :common:test :fabric:remapJar :neoforge:remapJar :forge:remapJar
+$env:JAVA_HOME = "C:\path\to\jdk-25"
+.\gradlew.bat :1.21.1-fabric:test :1.21.1-fabric:build :1.21.1-neoforge:build :1.21.1-forge:build
 ```
 
-`test` covers the permission rules, speed clamps, enforcement decisions, and the JSON store. The installable jars are the ones without `sources` or `dev-shadow` in the name:
+Replace `1.21.1` with another version from the table, such as `:1.20.1-forge:build` or `:26.1-fabric:build`. `test` covers the permission rules, speed clamps, enforcement decisions, and the JSON store, and it runs on the 1.21.1 Fabric project.
 
-| Loader | Jar |
+Jars are written to `versions/<java>/<minecraft>/<loader>/build/libs/`. The installable file is the one without `sources` in the name:
+
+| Loader | Example jar |
 | --- | --- |
-| Fabric | `fabric/build/libs/forcedflight-fabric-1.2.6.jar` |
-| NeoForge | `neoforge/build/libs/forcedflight-neoforge-1.2.6.jar` |
-| Forge | `forge/build/libs/forcedflight-forge-1.2.6.jar` |
+| Fabric | `forcedflight-fabric-1.2.7+1.21.1.jar` |
+| NeoForge | `forcedflight-neoforge-1.2.7+1.21.1.jar` |
+| Forge | `forcedflight-forge-1.2.7+1.21.1.jar` |
 
 ## Install
 
-Use the jar that matches the loader. The client and the server must use the same one. A Fabric jar does not load on NeoForge or Forge, and the three jars cannot be mixed.
+Use the jar that matches both the loader and the Minecraft version. The client and the server must use the same one. A Fabric jar does not load on NeoForge or Forge, and the three jars cannot be mixed.
 
-1. NeoForge 1.21.1: put `forcedflight-neoforge-1.2.6.jar` in the server `mods` folder and in the NeoForge client's `mods` folder.
-2. Forge 1.21.1: put `forcedflight-forge-1.2.6.jar` in both Forge `mods` folders.
-3. Fabric 1.21.1: install Fabric Loader and Fabric API, then put `forcedflight-fabric-1.2.6.jar` in both Fabric `mods` folders.
+1. NeoForge: put `forcedflight-neoforge-1.2.7+<version>.jar` in the server `mods` folder and in the NeoForge client's `mods` folder.
+2. Forge: put `forcedflight-forge-1.2.7+<version>.jar` in both Forge `mods` folders.
+3. Fabric: install Fabric Loader and Fabric API for that Minecraft version, then put `forcedflight-fabric-1.2.7+<version>.jar` in both Fabric `mods` folders.
 
 The client alone cannot grant flight. Restart the server after copying the jar. On join, chat explains the controls: `I` or `/flight` toggles permission, double-tap jump takes off, and Alt plus scroll changes speed. `/flight` is absent until that server has the matching jar.
 
@@ -166,7 +182,7 @@ Automated checks:
 .\gradlew.bat test
 ```
 
-Those tests cover operator toggle on and off, granting and revoking `allowcontrol` without dropping an existing grant, players who cannot toggle, speed clamps, a wiped ability set being restored without touching the other flags, Creative being left alone, and the permission file surviving a reload for more than one UUID.
+Those tests cover operator toggle on and off, a singleplayer host administering without vanilla OP, granting and revoking `allowcontrol` without dropping an existing grant, players who cannot toggle, speed clamps, a wiped ability set being restored without touching the other flags, Creative being left alone, and the permission file surviving a reload for more than one UUID.
 
 On a 1.21.1 client and server that both have the jar for that loader:
 

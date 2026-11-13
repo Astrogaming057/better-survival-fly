@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "id": "forcedflight",
+  "version": "${version}",
+  "name": "Forced Creative Flight",
+  "description": "Creative-style flight for authorized survival players. The server stays in charge.",
+  "authors": ["Forced Flight"],
+  "license": "MIT",
+  "environment": "*",
+  "entrypoints": {
+    "main": ["com.forcedflight.fabric.ForcedFlightFabric"],
+    "client": ["com.forcedflight.fabric.ForcedFlightFabricClient"]
+  },
+  "mixins": ["forcedflight.mixins.json"],
+  ${access_widener_line}
+  "depends": {
+    "fabricloader": ">=0.16.9",
+    "minecraft": "${mc_dep}",
+    "java": ">=${java_version}",
+    "fabric-api": "*"
+  }
+}
