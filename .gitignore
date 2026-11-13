@@ -1,5 +1,8 @@
 .gradle/
 build/
+.tmp-version-research/
+versions/*/build/
+versions/*/*/*/build/
 run/
 .jdk/
 *.log
