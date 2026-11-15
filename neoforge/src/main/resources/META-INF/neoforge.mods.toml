@@ -5,8 +5,8 @@ license = "MIT"
 [[mods]]
 modId = "forcedflight"
 version = "${version}"
-displayName = "Forced Creative Flight"
-authors = "Forced Flight"
+displayName = "Better Survival Fly"
+authors = "Itz_Just_Astro"
 description = '''
 Creative-style flight for authorized survival players. The server stays in charge.
 '''

@@ -9,3 +9,18 @@ run/
 .idea/
 *.iml
 out/
+
+# Local CurseForge installers and profile tooling
+.cf-installers/
+make-cf-profiles.ps1
+
+# Editor rules
+.cursor/
+
+# Game and smoke-test logs
+logs/
+smoke-*
+
+# Extracted jar metadata at the repo root
+/META-INF/
+/fabric.mod.json

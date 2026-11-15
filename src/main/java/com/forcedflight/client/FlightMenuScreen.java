@@ -42,7 +42,7 @@ public final class FlightMenuScreen extends Screen {
 	private int rosterPoll;
 
 	public FlightMenuScreen(Screen parent) {
-		super(McText.literal("Forced Creative Flight"));
+		super(McText.literal("Better Survival Fly"));
 		this.parent = parent;
 	}
 
@@ -131,7 +131,7 @@ public final class FlightMenuScreen extends Screen {
 		}));
 		hint = McText.literal(vanilla
 				? "Creative and spectator keep vanilla flight."
-				: String.format(Locale.ROOT, "Server cap %.2fx. Keep flying is only for you.", FlightSpeed.multiplier(state.maxSpeed)));
+				: String.format(Locale.ROOT, "Server cap %.2fx.", FlightSpeed.multiplier(state.maxSpeed)));
 	}
 
 	private void initControls(int x, int y) {

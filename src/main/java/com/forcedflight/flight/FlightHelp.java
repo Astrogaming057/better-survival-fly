@@ -20,11 +20,11 @@ public final class FlightHelp {
 		}
 		if (!ModConfig.get().enabled) {
 			McText.tell(player, McText.literal(
-					"Forced Creative Flight is installed, but disabled in config/forcedflight/config.json."), false);
+					"Better Survival Fly is installed, but disabled in config/forcedflight/config.json."), false);
 			return;
 		}
 		float max = FlightSpeed.multiplier(ModConfig.get().maxSpeed);
-		McText.tell(player, McText.literal("Forced Creative Flight").withStyle(ChatFormatting.GOLD), false);
+		McText.tell(player, McText.literal("Better Survival Fly").withStyle(ChatFormatting.GOLD), false);
 		McText.tell(player, McText.literal(
 				"Press I, or type /flight, to turn your own flight on or off. Operators can use /flight <player> for someone else. In singleplayer the world owner can do that even if cheats are off. Dedicated servers and LAN guests still need operator permission.")
 				.withStyle(ChatFormatting.GRAY), false);

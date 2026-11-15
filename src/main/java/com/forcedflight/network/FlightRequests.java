@@ -29,7 +29,7 @@ public final class FlightRequests {
 			int result = FlightManager.tryToggleFromClient(player);
 			if (result == FlightManager.TOGGLE_VANILLA) {
 				McText.tell(player, McText.literal(
-						"Forced Creative Flight is for survival only. Creative and spectator keep vanilla flight."), false);
+						"Better Survival Fly is for survival only. Creative and spectator keep vanilla flight."), false);
 			} else if (result != FlightManager.TOGGLE_CHANGED) {
 				McText.tell(player, McText.literal("You do not have permission to toggle flight."), false);
 			}

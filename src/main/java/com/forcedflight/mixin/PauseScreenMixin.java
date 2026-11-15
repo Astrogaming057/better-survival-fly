@@ -20,7 +20,15 @@ public abstract class PauseScreenMixin extends Screen {
 	@Unique
 	private boolean forcedflight$added;
 	@Unique
+	private boolean forcedflight$logged;
+	@Unique
 	private int forcedflight$waits;
+	@Unique
+	private int forcedflight$buttonX;
+	@Unique
+	private int forcedflight$buttonY;
+	@Unique
+	private int forcedflight$span = 204;
 
 	protected PauseScreenMixin(Component title) {
 		super(title);
@@ -30,14 +38,44 @@ public abstract class PauseScreenMixin extends Screen {
 	private void forcedflight$resetButton(CallbackInfo ci) {
 		this.forcedflight$added = false;
 		this.forcedflight$waits = 0;
+		forcedflight$placeElytra(true);
 	}
 
 	@Inject(method = "tick", at = @At("TAIL"))
 	private void forcedflight$elytraButton(CallbackInfo ci) {
+		forcedflight$placeElytra(false);
+	}
+
+	//? if >=26.1 {
+	/*@Inject(method = "extractRenderState", at = @At("TAIL"))
+	private void forcedflight$drawElytra(net.minecraft.client.gui.GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick, CallbackInfo ci) {
+		if (!showsMenu()) {
+			return;
+		}
+		int x = this.forcedflight$added ? this.forcedflight$buttonX : Math.max(2, this.width / 2 - 102);
+		int y = this.forcedflight$added ? this.forcedflight$buttonY : Math.max(2, this.height / 4);
+		int span = this.forcedflight$added ? this.forcedflight$span : 204;
+		if (!this.forcedflight$logged) {
+			this.forcedflight$logged = true;
+			com.forcedflight.ForcedFlight.LOGGER.info(
+					"Pause flight button added={} at {},{} span={} children={} screen={}x{}",
+					this.forcedflight$added, x, y, span, this.children().size(), this.width, this.height);
+		}
+		graphics.nextStratum();
+		graphics.fill(x, y, x + span, y + 20, 0xFFE6E6E6);
+		graphics.item(ElytraMenuButton.icon(), x + 6, y + 2);
+		graphics.text(this.font, "Flight", x + 28, y + 6, 0xFF202020);
+	}
+	*///?}
+
+	@Unique
+	private void forcedflight$placeElytra(boolean fromInit) {
 		if (this.forcedflight$added || !showsMenu()) {
 			return;
 		}
-		this.forcedflight$waits++;
+		if (!fromInit) {
+			this.forcedflight$waits++;
+		}
 		AbstractWidget mods = null;
 		AbstractWidget lowest = null;
 		for (GuiEventListener child : this.children()) {
@@ -52,10 +90,13 @@ public abstract class PauseScreenMixin extends Screen {
 			}
 		}
 		AbstractWidget anchor = mods != null ? mods : lowest;
+		//? if >=26.1 {
+		/*forcedflight$placeWide(anchor);
+		return;
+		*///?}
 		if (anchor == null || (mods == null && this.forcedflight$waits < 5)) {
 			return;
 		}
-		this.forcedflight$added = true;
 		int rowLeft = xOf(anchor);
 		int rowRight = xOf(anchor) + widthOf(anchor);
 		for (GuiEventListener child : this.children()) {
@@ -68,9 +109,60 @@ public abstract class PauseScreenMixin extends Screen {
 		if (x < 2) {
 			x = rowRight + 4;
 		}
-		this.addRenderableWidget(new ElytraMenuButton(x, yOf(anchor), button ->
+		if (x > this.width - 22) {
+			x = Math.max(2, this.width - 22);
+		}
+		int y = yOf(anchor);
+		if (y < 2) {
+			y = 2;
+		} else if (y > this.height - 22) {
+			y = this.height - 22;
+		}
+		this.forcedflight$added = true;
+		this.forcedflight$buttonX = x;
+		this.forcedflight$buttonY = y;
+		this.addRenderableWidget(new ElytraMenuButton(x, y, button ->
 				com.forcedflight.compat.McClient.setScreen(this.minecraft, new FlightMenuScreen(this))));
 	}
+
+	//? if >=26.1 {
+	/*@Unique
+	private void forcedflight$placeWide(AbstractWidget anchor) {
+		int span = 204;
+		int x = Math.max(2, this.width / 2 - span / 2);
+		int y = Math.max(2, this.height / 4);
+		if (anchor != null) {
+			int rowLeft = xOf(anchor);
+			int rowRight = rowLeft + widthOf(anchor);
+			for (GuiEventListener child : this.children()) {
+				if (child instanceof AbstractWidget widget && yOf(widget) == yOf(anchor)) {
+					rowLeft = Math.min(rowLeft, xOf(widget));
+					rowRight = Math.max(rowRight, xOf(widget) + widthOf(widget));
+				}
+			}
+			span = Math.max(120, rowRight - rowLeft);
+			x = rowLeft;
+			y = yOf(anchor) + anchor.getHeight() + 4;
+			if (x < 2) {
+				x = 2;
+			}
+			if (x + span > this.width - 2) {
+				x = Math.max(2, this.width - span - 2);
+			}
+			if (y > this.height - 22) {
+				y = Math.max(2, this.height - 22);
+			}
+		}
+		this.forcedflight$added = true;
+		this.forcedflight$buttonX = x;
+		this.forcedflight$buttonY = y;
+		this.forcedflight$span = span;
+		ElytraMenuButton button = new ElytraMenuButton(x, y, pressed ->
+				com.forcedflight.compat.McClient.setScreen(this.minecraft, new FlightMenuScreen(this)));
+		button.setWidth(span);
+		this.addRenderableWidget(button);
+	}
+	*///?}
 
 	private boolean showsMenu() {
 		//? if >=1.20.2 {
@@ -107,6 +199,6 @@ public abstract class PauseScreenMixin extends Screen {
 	@Unique
 	private static boolean isMods(String text) {
 		String lower = text.toLowerCase(java.util.Locale.ROOT);
-		return lower.equals("mods") || lower.startsWith("mods ") || lower.startsWith("mods(") || lower.startsWith("mods...");
+		return lower.equals("mods") || lower.startsWith("mods ") || lower.startsWith("mods(") || lower.startsWith("mods...") || lower.contains("mod");
 	}
 }

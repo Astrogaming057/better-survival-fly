@@ -51,7 +51,37 @@ public final class FlightMemberList extends ContainerObjectSelectionList<FlightM
 		//?} else {
 		/*super(minecraft, width, height, y, y + height, 24);
 		*///?}
+		// Vanilla paints textures/gui/options_background.png, a dirt tile, behind the list and above it.
+		//? if <1.20.6 {
+		/*setRenderBackground(false);
+		*///?}
+		//? if <1.20.2 {
+		/*setRenderTopAndBottom(false);
+		*///?}
 	}
+
+	//? if <1.20 {
+	/*@Override
+	public void render(com.mojang.blaze3d.vertex.PoseStack pose, int mouseX, int mouseY, float partialTick) {
+		int top = Math.max(0, this.y0 - 16);
+		net.minecraft.client.gui.GuiComponent.fill(pose, this.x0, top, this.x1, this.y1 + 16, 0xE0101010);
+		super.render(pose, mouseX, mouseY, partialTick);
+	}
+	*///?} elif <1.20.4 {
+	/*@Override
+	public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
+		int top = Math.max(0, this.y0 - 16);
+		graphics.fill(this.x0, top, this.x1, this.y1 + 16, 0xE0101010);
+		super.render(graphics, mouseX, mouseY, partialTick);
+	}
+	*///?} elif <1.20.6 {
+	/*@Override
+	public void renderWidget(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
+		int top = Math.max(0, getY() - 16);
+		graphics.fill(getX(), top, getX() + getWidth(), getY() + getHeight() + 16, 0xE0101010);
+		super.renderWidget(graphics, mouseX, mouseY, partialTick);
+	}
+	*///?}
 
 	public void place(int x) {
 		//? if >=1.20.4 {

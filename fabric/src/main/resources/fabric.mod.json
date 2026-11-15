@@ -2,9 +2,9 @@
   "schemaVersion": 1,
   "id": "forcedflight",
   "version": "${version}",
-  "name": "Forced Creative Flight",
+  "name": "Better Survival Fly",
   "description": "Creative-style flight for authorized survival players. The server stays in charge.",
-  "authors": ["Forced Flight"],
+  "authors": ["Itz_Just_Astro"],
   "license": "MIT",
   "environment": "*",
   "entrypoints": {

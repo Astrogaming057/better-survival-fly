@@ -120,6 +120,11 @@ repositories {
 
 val loom = extensions.getByType<net.fabricmc.loom.api.LoomGradleExtensionAPI>()
 loom.silentMojangMappingsLicense()
+if (isForge) {
+    configurations.configureEach {
+        exclude(group = "net.fabricmc", module = "fabric-log4j-util")
+    }
+}
 if (!isUnobfuscated) {
     loom.accessWidenerPath.set(rootProject.file("src/main/resources/forcedflight.accesswidener"))
 }
@@ -198,7 +203,7 @@ val expandVars = mapOf(
     "loader_range" to loaderRange,
     "fml_range" to fmlRange,
     "java_version" to javaInt.toString(),
-    "java_compat" to javaInt.toString(),
+    "java_compat" to if (isForge && stonecutter.eval(mcVersion, "<1.21")) minOf(javaInt, 17).toString() else javaInt.toString(),
     "access_widener_line" to if (isUnobfuscated) "" else "\"accessWidener\": \"forcedflight.accesswidener\",",
     "pack_extra" to packExtra,
     "destroy_speed_mixin" to if (isFabric) "    \"PlayerDestroySpeedMixin\",\n" else "",
@@ -214,13 +219,22 @@ tasks.named<ProcessResources>("processResources") {
     if (!isNeoForge || stonecutter.eval(mcVersion, "<1.20.5")) {
         exclude("META-INF/neoforge.mods.toml")
     }
+    exclude("META-INF/neoforge-legacy.mods.toml")
     inputs.properties(expandVars)
     filesMatching(listOf("fabric.mod.json", "forcedflight.mixins.json", "pack.mcmeta", "META-INF/mods.toml", "META-INF/neoforge.mods.toml")) {
         expand(expandVars)
     }
 }
 
-if (isNeoForge && stonecutter.eval(mcVersion, "<1.20.5")) {
+if (isNeoForge && stonecutter.eval(mcVersion, "<1.20.4")) {
+    tasks.named<ProcessResources>("processResources") {
+        from(rootProject.file("src/main/resources/META-INF/neoforge-legacy.mods.toml")) {
+            into("META-INF")
+            rename { "mods.toml" }
+            expand(expandVars)
+        }
+    }
+} else if (isNeoForge && stonecutter.eval(mcVersion, "<1.20.5")) {
     tasks.named<ProcessResources>("processResources") {
         from(rootProject.file("src/main/resources/META-INF/neoforge.mods.toml")) {
             into("META-INF")
@@ -290,4 +304,29 @@ if (!isUnobfuscated) {
             dependsOn("jar")
         }
     }
+}
+
+// Each CurseForge profile is FF.<loader>.<minecraft>. A finished jar replaces the
+// previous forcedflight jar there. Fabric API and other mods in that folder stay.
+val curseMods = file("C:/Users/Astro/curseforge/minecraft/Instances/FF.$loader.$mcVersion/mods")
+val installCurseForge = tasks.register("installCurseForge") {
+    doLast {
+        if (!curseMods.isDirectory) {
+            logger.lifecycle("CurseForge profile FF.$loader.$mcVersion is not installed; jar left in libs")
+            return@doLast
+        }
+        val built = layout.buildDirectory.file("libs/forcedflight-$loader-$version.jar").get().asFile
+        if (!built.isFile) {
+            logger.lifecycle("No installable jar at ${built.path}")
+            return@doLast
+        }
+        curseMods.listFiles()
+            ?.filter { it.isFile && it.name.startsWith("forcedflight-") && it.name.endsWith(".jar") }
+            ?.forEach { it.delete() }
+        built.copyTo(File(curseMods, built.name), overwrite = true)
+        logger.lifecycle("Installed ${built.name} into FF.$loader.$mcVersion")
+    }
+}
+tasks.named("assemble") {
+    finalizedBy(installCurseForge)
 }

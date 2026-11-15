@@ -95,7 +95,7 @@ public final class FlightCommand {
 		}
 		if (FlightManager.usesVanillaFlight(player)) {
 			context.getSource().sendFailure(McText.literal(
-					"Forced Creative Flight is for survival only. Creative and spectator keep vanilla flight."));
+					"Better Survival Fly is for survival only. Creative and spectator keep vanilla flight."));
 			return 0;
 		}
 		PlayerFlightRecord existing = FlightPermissionStore.get().get(player.getUUID()).orElse(null);

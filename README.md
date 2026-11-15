@@ -1,4 +1,4 @@
-# Forced Creative Flight
+# Better Survival Fly
 
 Minecraft mod, version **1.2.7**, for Fabric, NeoForge, and Forge. It gives authorized players vanilla Creative flight while they stay in Survival. Health, hunger, inventory, armor, damage, death, experience, and block and entity interaction are unchanged. The mod never switches the player's game mode.
 
@@ -132,7 +132,7 @@ The HUD and the default key live in the client config. Speed limits, the operato
 
 `operatorLevel` is the vanilla permission level treated as an operator. `2` matches a normal OP. The value is clamped to 1–4.
 
-`defaultToggleKey` is the key registered the first time Minecraft creates the control. After that, change it in Options → Controls → Forced Creative Flight. The binding is `Toggle Flight`.
+`defaultToggleKey` is the key registered the first time Minecraft creates the control. After that, change it in Options → Controls → Better Survival Fly. The binding is `Toggle Flight`.
 
 `flight.defaultSpeed` is vanilla Creative speed when it is `0.05`. That displays as `1.00x`. `minSpeed`, `maxSpeed`, and `speedStep` bound the scroll wheel. The default maximum is `0.375`, which displays as `7.50x`. Clients only scroll up to the maximum the server last sent. Operators change it with `/flight maxspeed`. Speeds are clamped again to the range 0.005 through 1.0 so a bad value cannot run away. A saved config that still has the old default maximum of `0.25` is raised to `0.375` the next time it loads.
 

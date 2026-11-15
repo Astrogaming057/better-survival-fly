@@ -20,8 +20,15 @@ import net.minecraft.client.gui.components.Tooltip;
 public final class ElytraMenuButton extends Button {
 	private static final ItemStack ICON = new ItemStack(Items.ELYTRA);
 
+	public static ItemStack icon() {
+		return ICON;
+	}
+
 	public ElytraMenuButton(int x, int y, OnPress onPress) {
-		//? if >=1.19.4 {
+		//? if >=26.1 {
+		/*super(x, y, 204, 20, McText.literal("Flight"), onPress, DEFAULT_NARRATION);
+		setTooltip(Tooltip.create(McText.literal("Flight")));
+		*///?} elif >=1.19.4 {
 		super(x, y, 20, 20, McText.empty(), onPress, DEFAULT_NARRATION);
 		setTooltip(Tooltip.create(McText.literal("Flight")));
 		//?} else {
@@ -32,7 +39,9 @@ public final class ElytraMenuButton extends Button {
 	//? if >=26.1 {
 	/*@Override
 	public void extractContents(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
-		graphics.item(ICON, getX() + 2, getY() + 2);
+		extractDefaultSprite(graphics);
+		extractDefaultLabel(graphics.textRendererForWidget(this, GuiGraphicsExtractor.HoveredTextEffects.NONE));
+		graphics.item(ICON, getX() + 6, getY() + 2);
 	}
 	*///?} elif >=1.21.11 {
 	/*@Override

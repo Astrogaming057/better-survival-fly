@@ -257,9 +257,7 @@ public final class ForcedFlightNeoForge {
 
 		@SubscribeEvent
 		public static void breakSpeed(PlayerEvent.BreakSpeed event) {
-			if (event.getEntity() instanceof net.minecraft.world.entity.player.Player player) {
-				event.setNewSpeed(FlightMining.withoutAirPenalty(player, event.getNewSpeed()));
-			}
+			event.setNewSpeed(FlightMining.withoutAirPenalty(event.getEntity(), event.getNewSpeed()));
 		}
 
 		@SubscribeEvent

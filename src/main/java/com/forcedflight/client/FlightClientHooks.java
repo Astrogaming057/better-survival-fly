@@ -126,7 +126,7 @@ public final class FlightClientHooks {
 			if (!warnedMissingServer && ticksSinceJoin == 60 && !state.hasServerState) {
 				warnedMissingServer = true;
 				FlightClientController.overlay(client.player, McText.literal(
-						"Forced Creative Flight is on this client, but this server has no /flight command. Put the same jar in the server mods folder and restart the server. Singleplayer uses the mods folder of this instance."
+						"Better Survival Fly is on this client, but this server has no /flight command. Put the same jar in the server mods folder and restart the server. Singleplayer uses the mods folder of this instance."
 				), false);
 			}
 		}
@@ -136,7 +136,7 @@ public final class FlightClientHooks {
 			}
 			if (FlightClientController.usesVanillaFlight(client.player)) {
 				FlightClientController.overlay(client.player, McText.literal(
-						"Forced Creative Flight is for survival only. Creative and spectator keep vanilla flight."), true);
+						"Better Survival Fly is for survival only. Creative and spectator keep vanilla flight."), true);
 				continue;
 			}
 			FlightRequests.sendToggle();
