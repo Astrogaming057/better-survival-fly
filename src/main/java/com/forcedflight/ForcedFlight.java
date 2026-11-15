@@ -5,7 +5,7 @@ import org.slf4j.LoggerFactory;
 
 public final class ForcedFlight {
 	public static final String MOD_ID = "forcedflight";
-	public static final String VERSION = "1.2.11";
+	public static final String VERSION = "1.2.12";
 	public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
 	public static final float VANILLA_FLY_SPEED = 0.05f;
 	public static final float HARD_MIN_SPEED = 0.005f;

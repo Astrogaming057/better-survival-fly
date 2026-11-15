@@ -20,8 +20,6 @@ public abstract class PauseScreenMixin extends Screen {
 	@Unique
 	private boolean forcedflight$added;
 	@Unique
-	private boolean forcedflight$logged;
-	@Unique
 	private int forcedflight$waits;
 	@Unique
 	private int forcedflight$buttonX;
@@ -45,25 +43,6 @@ public abstract class PauseScreenMixin extends Screen {
 	private void forcedflight$elytraButton(CallbackInfo ci) {
 		forcedflight$placeElytra(false);
 	}
-
-	//? if >=26.1 {
-	/*@Inject(method = "extractRenderState", at = @At("TAIL"))
-	private void forcedflight$drawElytra(net.minecraft.client.gui.GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick, CallbackInfo ci) {
-		int x = this.forcedflight$added ? this.forcedflight$buttonX : Math.max(2, this.width / 2 - 102);
-		int y = this.forcedflight$added ? this.forcedflight$buttonY : Math.max(2, this.height / 4);
-		int span = this.forcedflight$added ? this.forcedflight$span : 204;
-		if (!this.forcedflight$logged) {
-			this.forcedflight$logged = true;
-			com.forcedflight.ForcedFlight.LOGGER.info(
-					"Pause flight button added={} at {},{} span={} children={} screen={}x{}",
-					this.forcedflight$added, x, y, span, this.children().size(), this.width, this.height);
-		}
-		graphics.nextStratum();
-		graphics.fill(x, y, x + span, y + 20, 0xFFE6E6E6);
-		graphics.item(ElytraMenuButton.icon(), x + 6, y + 2);
-		graphics.text(this.font, "Flight", x + 28, y + 6, 0xFF202020);
-	}
-	*///?}
 
 	@Unique
 	private void forcedflight$placeElytra(boolean fromInit) {

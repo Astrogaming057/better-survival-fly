@@ -40,8 +40,19 @@ public final class ElytraMenuButton extends Button {
 	/*@Override
 	public void extractContents(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
 		extractDefaultSprite(graphics);
-		extractDefaultLabel(graphics.textRendererForWidget(this, GuiGraphicsExtractor.HoveredTextEffects.NONE));
-		graphics.item(ICON, getX() + 6, getY() + 2);
+		net.minecraft.client.gui.Font font = net.minecraft.client.Minecraft.getInstance().font;
+		int textWidth = font.width(getMessage());
+		int icon = 16;
+		int gap = 4;
+		int total = icon + gap + textWidth;
+		int x = getX() + (getWidth() - total) / 2;
+		int iconY = getY() + (getHeight() - icon) / 2;
+		graphics.blit(
+				net.minecraft.client.renderer.RenderPipelines.GUI_TEXTURED,
+				net.minecraft.resources.Identifier.withDefaultNamespace("textures/item/elytra.png"),
+				x, iconY, 0.0F, 0.0F, icon, icon, icon, icon);
+		graphics.textRendererForWidget(this, GuiGraphicsExtractor.HoveredTextEffects.NONE)
+				.accept(x + icon + gap, getY() + (getHeight() - 8) / 2, getMessage());
 	}
 	*///?} elif >=1.21.11 {
 	/*@Override
