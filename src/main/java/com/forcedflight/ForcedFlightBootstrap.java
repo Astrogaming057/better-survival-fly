@@ -17,7 +17,7 @@ public final class ForcedFlightBootstrap {
 			ForcedFlight.LOGGER.error("Could not create {}", ForcedFlightServices.directory, ex);
 		}
 		reload();
-		ForcedFlight.LOGGER.info("Better Survival Fly ready");
+		ForcedFlight.LOGGER.info("Better Survival Fly {} ready", ForcedFlight.VERSION);
 	}
 
 	public static void reload() {

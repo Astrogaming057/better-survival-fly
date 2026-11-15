@@ -203,7 +203,13 @@ val expandVars = mapOf(
     "loader_range" to loaderRange,
     "fml_range" to fmlRange,
     "java_version" to javaInt.toString(),
-    "java_compat" to if (isForge && stonecutter.eval(mcVersion, "<1.21")) minOf(javaInt, 17).toString() else javaInt.toString(),
+    // Forge 26 ships Mixin 0.8.7, whose compatibility enum stops at JAVA_21.
+    // JAVA_25 makes that mixin abort while reading the config.
+    "java_compat" to when {
+        isForge && stonecutter.eval(mcVersion, ">=26.1") -> "21"
+        isForge && stonecutter.eval(mcVersion, "<1.21") -> minOf(javaInt, 17).toString()
+        else -> javaInt.toString()
+    },
     "access_widener_line" to if (isUnobfuscated) "" else "\"accessWidener\": \"forcedflight.accesswidener\",",
     "pack_extra" to packExtra,
     "destroy_speed_mixin" to if (isFabric) "    \"PlayerDestroySpeedMixin\",\n" else "",
@@ -274,6 +280,11 @@ tasks.named<JavaCompile>("compileTestJava") {
 tasks.named<Jar>("jar") {
     from(rootProject.file("LICENSE")) {
         rename { "${it}_${base.archivesName.get()}" }
+    }
+    // Forge 26 uses Mixin 0.8.7, whose Forge platform agent never reads [[mixins]].
+    // The config is loaded only from this manifest attribute.
+    if (isForge && stonecutter.eval(mcVersion, ">=26.1")) {
+        manifest.attributes["MixinConfigs"] = "forcedflight.mixins.json"
     }
 }
 

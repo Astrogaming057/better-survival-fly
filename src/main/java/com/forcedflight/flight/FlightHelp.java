@@ -7,6 +7,7 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 
+import com.forcedflight.ForcedFlight;
 import com.forcedflight.config.ModConfig;
 import com.forcedflight.permission.FlightSpeed;
 
@@ -24,7 +25,7 @@ public final class FlightHelp {
 			return;
 		}
 		float max = FlightSpeed.multiplier(ModConfig.get().maxSpeed);
-		McText.tell(player, McText.literal("Better Survival Fly").withStyle(ChatFormatting.GOLD), false);
+		McText.tell(player, McText.literal("Better Survival Fly " + ForcedFlight.VERSION).withStyle(ChatFormatting.GOLD), false);
 		McText.tell(player, McText.literal(
 				"Press I, or type /flight, to turn your own flight on or off. Operators can use /flight <player> for someone else. In singleplayer the world owner can do that even if cheats are off. Dedicated servers and LAN guests still need operator permission.")
 				.withStyle(ChatFormatting.GRAY), false);

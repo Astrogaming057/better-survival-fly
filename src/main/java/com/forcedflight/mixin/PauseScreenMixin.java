@@ -49,9 +49,6 @@ public abstract class PauseScreenMixin extends Screen {
 	//? if >=26.1 {
 	/*@Inject(method = "extractRenderState", at = @At("TAIL"))
 	private void forcedflight$drawElytra(net.minecraft.client.gui.GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick, CallbackInfo ci) {
-		if (!showsMenu()) {
-			return;
-		}
 		int x = this.forcedflight$added ? this.forcedflight$buttonX : Math.max(2, this.width / 2 - 102);
 		int y = this.forcedflight$added ? this.forcedflight$buttonY : Math.max(2, this.height / 4);
 		int span = this.forcedflight$added ? this.forcedflight$span : 204;
@@ -70,9 +67,14 @@ public abstract class PauseScreenMixin extends Screen {
 
 	@Unique
 	private void forcedflight$placeElytra(boolean fromInit) {
-		if (this.forcedflight$added || !showsMenu()) {
+		if (this.forcedflight$added) {
 			return;
 		}
+		//? if <26.1 {
+		if (!showsMenu()) {
+			return;
+		}
+		//?}
 		if (!fromInit) {
 			this.forcedflight$waits++;
 		}
@@ -92,8 +94,7 @@ public abstract class PauseScreenMixin extends Screen {
 		AbstractWidget anchor = mods != null ? mods : lowest;
 		//? if >=26.1 {
 		/*forcedflight$placeWide(anchor);
-		return;
-		*///?}
+		*///?} else {
 		if (anchor == null || (mods == null && this.forcedflight$waits < 5)) {
 			return;
 		}
@@ -123,6 +124,7 @@ public abstract class PauseScreenMixin extends Screen {
 		this.forcedflight$buttonY = y;
 		this.addRenderableWidget(new ElytraMenuButton(x, y, button ->
 				com.forcedflight.compat.McClient.setScreen(this.minecraft, new FlightMenuScreen(this))));
+		//?}
 	}
 
 	//? if >=26.1 {
@@ -131,18 +133,29 @@ public abstract class PauseScreenMixin extends Screen {
 		int span = 204;
 		int x = Math.max(2, this.width / 2 - span / 2);
 		int y = Math.max(2, this.height / 4);
-		if (anchor != null) {
-			int rowLeft = xOf(anchor);
-			int rowRight = rowLeft + widthOf(anchor);
+		AbstractWidget bottom = anchor;
+		int top = Integer.MAX_VALUE;
+		for (GuiEventListener child : this.children()) {
+			if (!(child instanceof AbstractWidget widget) || widthOf(widget) < 20) {
+				continue;
+			}
+			top = Math.min(top, yOf(widget));
+			if (bottom == null || yOf(widget) + widget.getHeight() > yOf(bottom) + bottom.getHeight()) {
+				bottom = widget;
+			}
+		}
+		if (bottom != null) {
+			int rowLeft = xOf(bottom);
+			int rowRight = rowLeft + widthOf(bottom);
 			for (GuiEventListener child : this.children()) {
-				if (child instanceof AbstractWidget widget && yOf(widget) == yOf(anchor)) {
+				if (child instanceof AbstractWidget widget && yOf(widget) == yOf(bottom)) {
 					rowLeft = Math.min(rowLeft, xOf(widget));
 					rowRight = Math.max(rowRight, xOf(widget) + widthOf(widget));
 				}
 			}
 			span = Math.max(120, rowRight - rowLeft);
 			x = rowLeft;
-			y = yOf(anchor) + anchor.getHeight() + 4;
+			y = yOf(bottom) + bottom.getHeight() + 4;
 			if (x < 2) {
 				x = 2;
 			}
@@ -150,7 +163,7 @@ public abstract class PauseScreenMixin extends Screen {
 				x = Math.max(2, this.width - span - 2);
 			}
 			if (y > this.height - 22) {
-				y = Math.max(2, this.height - 22);
+				y = Math.max(2, top - 24);
 			}
 		}
 		this.forcedflight$added = true;
