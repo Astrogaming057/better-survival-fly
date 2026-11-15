@@ -139,6 +139,11 @@ public final class FlightClientHooks {
 						"Better Survival Fly is for survival only. Creative and spectator keep vanilla flight."), true);
 				continue;
 			}
+			if (state.damageLocked) {
+				FlightClientController.overlay(client.player, McText.literal(
+						"Flight stays off until the damage timer ends."), true);
+				continue;
+			}
 			FlightRequests.sendToggle();
 		}
 		tickSpeedKeys(client);

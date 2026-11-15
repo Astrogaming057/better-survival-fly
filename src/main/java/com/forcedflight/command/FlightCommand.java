@@ -5,6 +5,7 @@ import java.util.Locale;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.FloatArgumentType;
+import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 
@@ -49,6 +50,16 @@ public final class FlightCommand {
 								.executes(context -> setJoinMessage(context, !ModConfig.get().joinMessage))
 								.then(Commands.literal("on").executes(context -> setJoinMessage(context, true)))
 								.then(Commands.literal("off").executes(context -> setJoinMessage(context, false))))
+						.then(Commands.literal("damagedrop").requires(FlightCommand::isAdmin)
+								.executes(context -> setDamageDrop(context, !ModConfig.get().damageDrop))
+								.then(Commands.literal("on").executes(context -> setDamageDrop(context, true)))
+								.then(Commands.literal("off").executes(context -> setDamageDrop(context, false)))
+								.then(Commands.literal("players").executes(context -> setDamageDropFrom(context, FlightPolicy.DAMAGE_FROM_PLAYERS)))
+								.then(Commands.literal("mobs").executes(context -> setDamageDropFrom(context, FlightPolicy.DAMAGE_FROM_MOBS)))
+								.then(Commands.literal("both").executes(context -> setDamageDropFrom(context, FlightPolicy.DAMAGE_FROM_BOTH)))
+								.then(Commands.literal("seconds")
+										.then(Commands.argument("seconds", IntegerArgumentType.integer(1, 300))
+												.executes(FlightCommand::setDamageDropSeconds))))
 						.then(Commands.literal("keepflying")
 								.executes(context -> setOwnKeepFlying(context, null))
 								.then(Commands.literal("on").executes(context -> setOwnKeepFlying(context, true)))
@@ -218,6 +229,33 @@ public final class FlightCommand {
 		feedback(context, saved
 				? "Fly mining penalty enabled. Breaking blocks while flying is slower."
 				: "Fly mining penalty disabled. Breaking blocks while flying uses normal speed. Jumping is unchanged.");
+		return Command.SINGLE_SUCCESS;
+	}
+
+	private static int setDamageDrop(CommandContext<CommandSourceStack> context, boolean enabled) {
+		boolean saved = ModConfig.saveDamageDrop(enabled);
+		if (!saved) {
+			FlightManager.releaseDamageDrops();
+		}
+		FlightManager.broadcastState();
+		feedback(context, saved
+				? "Damage disables flight for " + FlightPolicy.damageDropDuration(ModConfig.get().damageDropSeconds)
+						+ ", from " + FlightPolicy.damageDropFromName(ModConfig.get().damageDropFrom).toLowerCase(Locale.ROOT) + "."
+				: "Damage no longer disables flight.");
+		return Command.SINGLE_SUCCESS;
+	}
+
+	private static int setDamageDropFrom(CommandContext<CommandSourceStack> context, int from) {
+		int saved = ModConfig.saveDamageDropFrom(from);
+		FlightManager.broadcastState();
+		feedback(context, "Damage disables flight from " + FlightPolicy.damageDropFromName(saved).toLowerCase(Locale.ROOT) + ".");
+		return Command.SINGLE_SUCCESS;
+	}
+
+	private static int setDamageDropSeconds(CommandContext<CommandSourceStack> context) {
+		int seconds = ModConfig.saveDamageDropSeconds(IntegerArgumentType.getInteger(context, "seconds"));
+		FlightManager.broadcastState();
+		feedback(context, "Damage disables flight for " + FlightPolicy.damageDropDuration(seconds) + ".");
 		return Command.SINGLE_SUCCESS;
 	}
 

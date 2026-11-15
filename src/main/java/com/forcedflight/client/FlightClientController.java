@@ -78,7 +78,7 @@ public final class FlightClientController {
 
 	public static void onLocalFlyingSample(LocalPlayer player) {
 		ClientFlightState state = ClientFlightState.get();
-		if (!state.hasServerState || !state.authorized || vanillaOwns(player)) {
+		if (!state.hasServerState || !state.authorized || state.damageLocked || vanillaOwns(player)) {
 			return;
 		}
 		state.flying = player.getAbilities().flying;
@@ -126,6 +126,11 @@ public final class FlightClientController {
 			return;
 		}
 		Abilities abilities = player.getAbilities();
+		if (state.damageLocked) {
+			abilities.mayfly = false;
+			abilities.flying = false;
+			return;
+		}
 		abilities.mayfly = true;
 		abilities.flying = state.flying;
 		if (Math.abs(abilities.getFlyingSpeed() - state.flySpeed) >= 0.0001f) {

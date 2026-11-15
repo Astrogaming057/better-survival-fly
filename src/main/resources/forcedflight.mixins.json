@@ -6,6 +6,7 @@
   "mixins": [
     "PlayerTravelMixin",
 ${destroy_speed_mixin}    "PlayerFallMixin",
+    "PlayerHurtMixin",
     "ServerPlayerMixin",
     "ServerPlayerCopyMixin",
     "ServerGamePacketListenerImplMixin",

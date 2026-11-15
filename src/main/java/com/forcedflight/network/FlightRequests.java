@@ -30,6 +30,8 @@ public final class FlightRequests {
 			if (result == FlightManager.TOGGLE_VANILLA) {
 				McText.tell(player, McText.literal(
 						"Better Survival Fly is for survival only. Creative and spectator keep vanilla flight."), false);
+			} else if (result == FlightManager.TOGGLE_DAMAGE) {
+				McText.tell(player, McText.literal("Flight stays off until the damage timer ends."), true);
 			} else if (result != FlightManager.TOGGLE_CHANGED) {
 				McText.tell(player, McText.literal("You do not have permission to toggle flight."), false);
 			}
@@ -79,6 +81,30 @@ public final class FlightRequests {
 			McText.tell(player, McText.literal(enabled
 					? "Join message enabled."
 					: "Join message disabled."), false);
+			return;
+		}
+		if (payload.action() == FlightRequestPayload.SET_DAMAGE_DROP) {
+			boolean enabled = ModConfig.saveDamageDrop(payload.flySpeed() >= 0.5f);
+			if (!enabled) {
+				FlightManager.releaseDamageDrops();
+			}
+			FlightManager.broadcastState();
+			McText.tell(player, McText.literal(enabled
+					? "Damage disables flight for " + FlightPolicy.damageDropDuration(ModConfig.get().damageDropSeconds)
+							+ ", from " + FlightPolicy.damageDropFromName(ModConfig.get().damageDropFrom).toLowerCase(Locale.ROOT) + "."
+					: "Damage no longer disables flight."), false);
+			return;
+		}
+		if (payload.action() == FlightRequestPayload.SET_DAMAGE_DROP_FROM) {
+			int from = ModConfig.saveDamageDropFrom(Math.round(payload.flySpeed()));
+			FlightManager.broadcastState();
+			McText.tell(player, McText.literal("Damage disables flight from " + FlightPolicy.damageDropFromName(from).toLowerCase(Locale.ROOT) + "."), false);
+			return;
+		}
+		if (payload.action() == FlightRequestPayload.SET_DAMAGE_DROP_SECONDS) {
+			int seconds = ModConfig.saveDamageDropSeconds(Math.round(payload.flySpeed()));
+			FlightManager.broadcastState();
+			McText.tell(player, McText.literal("Damage disables flight for " + FlightPolicy.damageDropDuration(seconds) + "."), false);
 		}
 	}
 
@@ -108,6 +134,18 @@ public final class FlightRequests {
 
 	public static void sendKeepFlying(boolean enabled) {
 		send(FlightRequestPayload.SET_KEEP_FLYING, enabled ? 1f : 0f);
+	}
+
+	public static void sendDamageDrop(boolean enabled) {
+		send(FlightRequestPayload.SET_DAMAGE_DROP, enabled ? 1f : 0f);
+	}
+
+	public static void sendDamageDropFrom(int from) {
+		send(FlightRequestPayload.SET_DAMAGE_DROP_FROM, from);
+	}
+
+	public static void sendDamageDropSeconds(int seconds) {
+		send(FlightRequestPayload.SET_DAMAGE_DROP_SECONDS, seconds);
 	}
 
 	public static void handleMember(ServerPlayer operator, FlightMemberPayload payload) {

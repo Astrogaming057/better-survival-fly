@@ -9,6 +9,7 @@ import net.minecraft.server.level.ServerPlayer;
 
 import com.forcedflight.ForcedFlight;
 import com.forcedflight.config.ModConfig;
+import com.forcedflight.permission.FlightPolicy;
 import com.forcedflight.permission.FlightSpeed;
 
 public final class FlightHelp {
@@ -46,5 +47,12 @@ public final class FlightHelp {
 		McText.tell(player, McText.literal(
 				"Keep flying after landing is a personal setting. Change it with /flight keepflying or in the Flight menu.")
 				.withStyle(ChatFormatting.GRAY), false);
+		if (ModConfig.get().damageDrop) {
+			McText.tell(player, McText.literal(String.format(Locale.ROOT,
+					"Taking damage from %s turns flight off for %s. Operators can change that in the Flight menu.",
+					FlightPolicy.damageDropFromName(ModConfig.get().damageDropFrom).toLowerCase(Locale.ROOT),
+					FlightPolicy.damageDropDuration(ModConfig.get().damageDropSeconds)))
+					.withStyle(ChatFormatting.GRAY), false);
+		}
 	}
 }

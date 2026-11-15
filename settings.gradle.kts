@@ -26,10 +26,14 @@ val minecraftVersions = listOf(
 // Forge never shipped 1.21.2. NeoForge starts at 1.20.2.
 val noForge = setOf("1.21.2")
 val noNeoForge = setOf("1.18.2", "1.19.2", "1.19.4", "1.20", "1.20.1")
+// Loom's remapper asks every project for mappings, and unobfuscated 26.x projects throw.
+// -Pff.skipUnobfuscated=true builds the older Forge jars without those projects present.
+val skipUnobfuscated = gradle.startParameter.projectProperties["ff.skipUnobfuscated"] == "true"
+val buildVersions = minecraftVersions.filter { !skipUnobfuscated || !it.startsWith("26.") }
 
 fun loaderFor(projectName: String) = projectName.substringAfterLast('-')
 
-for (mc in minecraftVersions) {
+for (mc in buildVersions) {
     for (loader in listOf("fabric", "forge", "neoforge")) {
         if (loader == "forge" && mc in noForge) continue
         if (loader == "neoforge" && mc in noNeoForge) continue
@@ -44,7 +48,7 @@ stonecutter {
     centralScript = "build.gradle.kts"
     create(rootProject) {
         val nodes = buildList {
-            for (mc in minecraftVersions) {
+            for (mc in buildVersions) {
                 add("$mc-fabric" to mc)
                 if (mc !in noForge) add("$mc-forge" to mc)
                 if (mc !in noNeoForge) add("$mc-neoforge" to mc)

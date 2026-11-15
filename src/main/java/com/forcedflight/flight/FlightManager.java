@@ -7,8 +7,14 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.entity.player.Abilities;
+
+import com.forcedflight.compat.McText;
 
 import com.forcedflight.ForcedFlight;
 import com.forcedflight.ForcedFlightServices;
@@ -30,11 +36,13 @@ public final class FlightManager {
 	public static final int TOGGLE_DENIED = 0;
 	public static final int TOGGLE_CHANGED = 1;
 	public static final int TOGGLE_VANILLA = 2;
+	public static final int TOGGLE_DAMAGE = 3;
 
 	private static final Set<UUID> ONLINE = ConcurrentHashMap.newKeySet();
 	private static final Set<UUID> JOIN_RESEND = ConcurrentHashMap.newKeySet();
 	private static final ConcurrentHashMap<UUID, Integer> LAST_RESYNC_TICK = new ConcurrentHashMap<>();
 	private static final ConcurrentHashMap<UUID, Boolean> CONFLICT_LOGGED = new ConcurrentHashMap<>();
+	private static final ConcurrentHashMap<UUID, Integer> DAMAGE_DROP_UNTIL = new ConcurrentHashMap<>();
 	private static volatile boolean anyoneOnline;
 	private static volatile MinecraftServer server;
 	private static int sendDepth;
@@ -51,6 +59,7 @@ public final class FlightManager {
 		JOIN_RESEND.clear();
 		LAST_RESYNC_TICK.clear();
 		CONFLICT_LOGGED.clear();
+		DAMAGE_DROP_UNTIL.clear();
 		anyoneOnline = false;
 		sendDepth = 0;
 		server = null;
@@ -64,6 +73,7 @@ public final class FlightManager {
 	}
 
 	public static void deliverJoinState(MinecraftServer current) {
+		tickDamageDrops(current);
 		if (JOIN_RESEND.isEmpty()) {
 			return;
 		}
@@ -95,6 +105,7 @@ public final class FlightManager {
 	}
 
 	public static void onDisconnect(ServerPlayer player) {
+		DAMAGE_DROP_UNTIL.remove(player.getUUID());
 		captureFlying(player);
 		markOnline(player.getUUID(), false);
 		LAST_RESYNC_TICK.remove(player.getUUID());
@@ -111,6 +122,20 @@ public final class FlightManager {
 	}
 
 	public static void onRespawn(ServerPlayer player) {
+		if (DAMAGE_DROP_UNTIL.remove(player.getUUID()) != null) {
+			PlayerFlightRecord record = FlightPermissionStore.get().get(player.getUUID()).orElse(null);
+			if (record != null && record.authorized()) {
+				record.setFlying(true);
+			}
+		}
+		restoreAfterCopy(player);
+	}
+
+	public static void onWorldChange(ServerPlayer player) {
+		restoreAfterCopy(player);
+	}
+
+	private static void restoreAfterCopy(ServerPlayer player) {
 		PlayerFlightRecord record = FlightPermissionStore.get().get(player.getUUID()).orElse(null);
 		if (record != null && record.authorized()) {
 			markOnline(player.getUUID(), true);
@@ -118,10 +143,6 @@ public final class FlightManager {
 		} else {
 			sendState(player, false);
 		}
-	}
-
-	public static void onWorldChange(ServerPlayer player) {
-		onRespawn(player);
 	}
 
 	public static void beforeTravel(ServerPlayer player) {
@@ -169,6 +190,11 @@ public final class FlightManager {
 		if (record == null || !record.authorized() || vanillaOwns(player)) {
 			return;
 		}
+		if (damageDropped(player)) {
+			clearGrant(player);
+			sendAbilities(player);
+			return;
+		}
 		Abilities abilities = player.getAbilities();
 		abilities.mayfly = true;
 		abilities.setFlyingSpeed(record.flySpeed());
@@ -184,6 +210,9 @@ public final class FlightManager {
 		}
 		if (vanillaOwns(player)) {
 			return TOGGLE_VANILLA;
+		}
+		if (damageDropped(player)) {
+			return TOGGLE_DAMAGE;
 		}
 		PlayerFlightRecord existing = FlightPermissionStore.get().get(player.getUUID()).orElse(null);
 		if (!FlightPolicy.canToggleSelf(isOperator(player), existing != null && existing.allowControl())) {
@@ -254,6 +283,8 @@ public final class FlightManager {
 		markOnline(player.getUUID(), record.authorized());
 		if (vanillaOwns(player)) {
 			restoreVanillaFlySpeed(player);
+		} else if (record.authorized() && damageDropped(player)) {
+			clearGrant(player);
 		} else if (record.authorized()) {
 			write(player, FlightPolicy.reconcile(capture(player), record, false, suppressFlying(player)));
 		} else {
@@ -327,6 +358,14 @@ public final class FlightManager {
 		if (vanillaOwns(player)) {
 			return false;
 		}
+		if (damageDropped(player)) {
+			AbilitySnapshot current = capture(player);
+			if (!current.allowFlying() && !current.flying()) {
+				return false;
+			}
+			clearGrant(player);
+			return true;
+		}
 		PlayerFlightRecord record = FlightPermissionStore.get().get(player.getUUID()).orElse(null);
 		AbilitySnapshot next = FlightPolicy.reconcile(capture(player), record, false, suppressFlying(player));
 		AbilitySnapshot current = capture(player);
@@ -398,7 +437,8 @@ public final class FlightManager {
 		boolean authorized = record != null && record.authorized();
 		boolean allowControl = record != null && record.allowControl();
 		float speed = record == null ? config.defaultSpeed : record.flySpeed();
-		boolean flying = record != null && record.flying();
+		boolean locked = damageDropped(player);
+		boolean flying = record != null && record.flying() && !locked;
 		int revision = McServer.server(player) == null ? 0 : McServer.server(player).getTickCount();
 		ForcedFlightServices.sendState.accept(player, new FlightStatePayload(
 				revision,
@@ -415,7 +455,11 @@ public final class FlightManager {
 				isOperator(player),
 				config.fallDamage,
 				config.joinMessage,
-				record != null && record.keepFlying()
+				record != null && record.keepFlying(),
+				config.damageDrop,
+				config.damageDropSeconds,
+				config.damageDropFrom,
+				locked
 		));
 	}
 
@@ -464,6 +508,98 @@ public final class FlightManager {
 
 	private static boolean suppressFlying(ServerPlayer player) {
 		return !player.isAlive() || player.isSleeping() || player.isPassenger();
+	}
+
+	/**
+	 * A matching hit grounds an authorized survival player until the configured time is up.
+	 * The grant itself stays, and the saved flying flag is what comes back when the timer ends.
+	 */
+	public static void onDamaged(ServerPlayer player, DamageSource source) {
+		ModConfig config = ModConfig.get();
+		if (!config.enabled || !config.damageDrop || vanillaOwns(player) || player.connection == null || !player.isAlive()) {
+			return;
+		}
+		Entity attacker = source.getEntity();
+		if (attacker == null || attacker == player) {
+			return;
+		}
+		boolean fromPlayer = attacker instanceof Player;
+		boolean fromMob = attacker instanceof LivingEntity && !fromPlayer;
+		if (!FlightPolicy.damageDropsFlight(true, config.damageDropFrom, fromPlayer, fromMob)) {
+			return;
+		}
+		PlayerFlightRecord record = FlightPermissionStore.get().get(player.getUUID()).orElse(null);
+		if (record == null || !record.authorized()) {
+			return;
+		}
+		MinecraftServer current = McServer.server(player);
+		if (current == null) {
+			return;
+		}
+		int until = current.getTickCount() + config.damageDropSeconds * 20;
+		boolean started = DAMAGE_DROP_UNTIL.put(player.getUUID(), until) == null;
+		clearGrant(player);
+		sendState(player, false);
+		sendAbilities(player);
+		if (started) {
+			McText.tell(player, McText.literal(
+					"Flight disabled for " + FlightPolicy.damageDropDuration(config.damageDropSeconds) + "."), true);
+		}
+	}
+
+	/** Turns flight back on for anyone currently grounded by the damage timer. */
+	public static void releaseDamageDrops() {
+		if (DAMAGE_DROP_UNTIL.isEmpty()) {
+			return;
+		}
+		MinecraftServer current = server;
+		java.util.ArrayList<UUID> ids = new java.util.ArrayList<>(DAMAGE_DROP_UNTIL.keySet());
+		DAMAGE_DROP_UNTIL.clear();
+		if (current == null) {
+			return;
+		}
+		for (UUID uuid : ids) {
+			ServerPlayer player = current.getPlayerList().getPlayer(uuid);
+			if (player != null) {
+				pushFlight(player, false);
+			}
+		}
+	}
+
+	private static void tickDamageDrops(MinecraftServer current) {
+		if (DAMAGE_DROP_UNTIL.isEmpty()) {
+			return;
+		}
+		int now = current.getTickCount();
+		for (UUID uuid : List.copyOf(DAMAGE_DROP_UNTIL.keySet())) {
+			Integer until = DAMAGE_DROP_UNTIL.get(uuid);
+			if (until == null || now < until) {
+				continue;
+			}
+			if (!DAMAGE_DROP_UNTIL.remove(uuid, until)) {
+				continue;
+			}
+			ServerPlayer player = current.getPlayerList().getPlayer(uuid);
+			if (player != null) {
+				pushFlight(player, false);
+			}
+		}
+	}
+
+	private static boolean damageDropped(ServerPlayer player) {
+		Integer until = DAMAGE_DROP_UNTIL.get(player.getUUID());
+		if (until == null) {
+			return false;
+		}
+		MinecraftServer current = McServer.server(player);
+		if (current == null) {
+			return true;
+		}
+		if (current.getTickCount() >= until) {
+			DAMAGE_DROP_UNTIL.remove(player.getUUID(), until);
+			return false;
+		}
+		return true;
 	}
 
 	private static boolean vanillaOwns(ServerPlayer player) {

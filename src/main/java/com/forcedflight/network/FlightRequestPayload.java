@@ -23,6 +23,9 @@ public record FlightRequestPayload(int action, float flySpeed)
 	public static final int SET_FALL_DAMAGE = 5;
 	public static final int SET_JOIN_MESSAGE = 6;
 	public static final int SET_KEEP_FLYING = 7;
+	public static final int SET_DAMAGE_DROP = 8;
+	public static final int SET_DAMAGE_DROP_FROM = 9;
+	public static final int SET_DAMAGE_DROP_SECONDS = 10;
 
 	//? if >=1.20.5 {
 	public static final Type<FlightRequestPayload> TYPE = new Type<>(McIds.id("request"));

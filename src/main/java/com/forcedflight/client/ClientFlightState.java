@@ -3,6 +3,7 @@ package com.forcedflight.client;
 import com.forcedflight.ForcedFlight;
 import com.forcedflight.config.ModConfig;
 import com.forcedflight.network.FlightStatePayload;
+import com.forcedflight.permission.FlightPolicy;
 
 public final class ClientFlightState {
 	private static final ClientFlightState INSTANCE = new ClientFlightState();
@@ -21,6 +22,10 @@ public final class ClientFlightState {
 	public boolean fallDamage = true;
 	public boolean joinMessage = true;
 	public boolean keepFlying;
+	public boolean damageDrop;
+	public int damageDropSeconds = FlightPolicy.DAMAGE_DROP_DEFAULT_SECONDS;
+	public int damageDropFrom = FlightPolicy.DAMAGE_FROM_BOTH;
+	public boolean damageLocked;
 	public int clientTicks;
 	public int hudUntilTick;
 
@@ -42,6 +47,10 @@ public final class ClientFlightState {
 		fallDamage = true;
 		joinMessage = true;
 		keepFlying = false;
+		damageDrop = false;
+		damageDropSeconds = FlightPolicy.DAMAGE_DROP_DEFAULT_SECONDS;
+		damageDropFrom = FlightPolicy.DAMAGE_FROM_BOTH;
+		damageLocked = false;
 		hudUntilTick = 0;
 	}
 
@@ -62,6 +71,10 @@ public final class ClientFlightState {
 		fallDamage = payload.fallDamage();
 		joinMessage = payload.joinMessage();
 		keepFlying = payload.keepFlying();
+		damageDrop = payload.damageDrop();
+		damageDropSeconds = payload.damageDropSeconds();
+		damageDropFrom = payload.damageDropFrom();
+		damageLocked = payload.damageLocked();
 		if (payload.announce() || wasAuthorized != authorized || Math.abs(previousSpeed - flySpeed) >= 0.0001f) {
 			bumpHud();
 		}

@@ -23,6 +23,7 @@ import com.forcedflight.compat.McClient;
 import com.forcedflight.compat.McWidgets;
 import com.forcedflight.config.ModConfig;
 import com.forcedflight.network.FlightRequests;
+import com.forcedflight.permission.FlightPolicy;
 import com.forcedflight.permission.FlightSpeed;
 import com.mojang.blaze3d.platform.InputConstants;
 
@@ -96,7 +97,7 @@ public final class FlightMenuScreen extends Screen {
 			state.authorized = !state.authorized;
 			refreshFlightWidgets();
 		}, x, y, 240, 20);
-		this.flightToggle.active = state.canToggle && !vanilla && state.hasServerState;
+		this.flightToggle.active = state.canToggle && !state.damageLocked && !vanilla && state.hasServerState;
 		addRenderableWidget(this.flightToggle);
 		y += ROW;
 		if (state.hasServerState && state.maxSpeed > state.minSpeed) {
@@ -206,6 +207,54 @@ public final class FlightMenuScreen extends Screen {
 			state.joinMessage = true;
 			refreshScreen();
 		}));
+		y += ROW;
+		addRenderableWidget(CycleButton.onOffBuilder(state.damageDrop)
+				.create(x, y, 190, 20, McText.literal("Disable flight on damage"), (button, value) -> {
+					state.damageDrop = value;
+					FlightRequests.sendDamageDrop(value);
+					refreshScreen();
+				}));
+		addRenderableWidget(resetButton(x + 194, y, () -> {
+			FlightRequests.sendDamageDrop(false);
+			state.damageDrop = false;
+			refreshScreen();
+		}));
+		if (!state.damageDrop) {
+			hint = McText.literal("Server settings save immediately and apply to everyone.");
+			return;
+		}
+		y += ROW;
+		addRenderableWidget(CycleButton.<Integer>builder(value -> McText.literal(FlightPolicy.damageDropFromName(value))
+				//? if >=1.21.11 {
+				/*, () -> state.damageDropFrom
+				*///?}
+				)
+				.withValues(FlightPolicy.DAMAGE_FROM_PLAYERS, FlightPolicy.DAMAGE_FROM_MOBS, FlightPolicy.DAMAGE_FROM_BOTH)
+				//? if <1.21.11 {
+				.withInitialValue(state.damageDropFrom)
+				//?}
+				.create(x, y, 190, 20, McText.literal("From"), (button, value) -> {
+					state.damageDropFrom = value;
+					FlightRequests.sendDamageDropFrom(value);
+				}));
+		addRenderableWidget(resetButton(x + 194, y, () -> {
+			FlightRequests.sendDamageDropFrom(FlightPolicy.DAMAGE_FROM_BOTH);
+			state.damageDropFrom = FlightPolicy.DAMAGE_FROM_BOTH;
+			refreshScreen();
+		}));
+		y += ROW;
+		addRenderableWidget(new ReleaseSlider(x, y, 190, 20, FlightPolicy.damageDropSlider(state.damageDropSeconds), value -> {
+			return "For " + FlightPolicy.damageDropDuration(FlightPolicy.damageDropSecondsFromSlider(value));
+		}, value -> {
+			int seconds = FlightPolicy.damageDropSecondsFromSlider(value);
+			state.damageDropSeconds = seconds;
+			FlightRequests.sendDamageDropSeconds(seconds);
+		}));
+		addRenderableWidget(resetButton(x + 194, y, () -> {
+			FlightRequests.sendDamageDropSeconds(FlightPolicy.DAMAGE_DROP_DEFAULT_SECONDS);
+			state.damageDropSeconds = FlightPolicy.DAMAGE_DROP_DEFAULT_SECONDS;
+			refreshScreen();
+		}));
 		hint = McText.literal("Server settings save immediately and apply to everyone.");
 	}
 
@@ -283,7 +332,7 @@ public final class FlightMenuScreen extends Screen {
 		boolean vanilla = vanillaFlight();
 		if (this.flightToggle != null) {
 			this.flightToggle.setMessage(McText.literal(flightLabel(state, vanilla)));
-			this.flightToggle.active = state.canToggle && !vanilla && state.hasServerState;
+			this.flightToggle.active = state.canToggle && !state.damageLocked && !vanilla && state.hasServerState;
 		}
 		if (this.speedSlider != null && state.maxSpeed > state.minSpeed) {
 			boolean unlocked = state.authorized && !vanilla && state.hasServerState;
@@ -316,6 +365,9 @@ public final class FlightMenuScreen extends Screen {
 		}
 		if (vanilla) {
 			return "Vanilla flight is in charge";
+		}
+		if (state.damageLocked) {
+			return "Flight paused";
 		}
 		if (!state.canToggle) {
 			return state.authorized ? "Flight is on" : "Flight is off";

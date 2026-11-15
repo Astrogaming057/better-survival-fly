@@ -226,4 +226,27 @@ class FlightRulesTest {
 		assertFalse(record.flying());
 		assertTrue(Files.exists(dir.resolve("permissions.json")));
 	}
+
+	@Test
+	void damageDropMatchesOnlyTheSelectedAttacker() {
+		assertFalse(FlightPolicy.damageDropsFlight(false, FlightPolicy.DAMAGE_FROM_BOTH, true, false));
+		assertFalse(FlightPolicy.damageDropsFlight(true, FlightPolicy.DAMAGE_FROM_BOTH, false, false));
+		assertTrue(FlightPolicy.damageDropsFlight(true, FlightPolicy.DAMAGE_FROM_PLAYERS, true, false));
+		assertFalse(FlightPolicy.damageDropsFlight(true, FlightPolicy.DAMAGE_FROM_PLAYERS, false, true));
+		assertTrue(FlightPolicy.damageDropsFlight(true, FlightPolicy.DAMAGE_FROM_MOBS, false, true));
+		assertFalse(FlightPolicy.damageDropsFlight(true, FlightPolicy.DAMAGE_FROM_MOBS, true, false));
+		assertTrue(FlightPolicy.damageDropsFlight(true, FlightPolicy.DAMAGE_FROM_BOTH, true, false));
+		assertTrue(FlightPolicy.damageDropsFlight(true, FlightPolicy.DAMAGE_FROM_BOTH, false, true));
+		assertEquals(FlightPolicy.DAMAGE_FROM_BOTH, FlightPolicy.clampDamageDropFrom(9));
+		assertEquals(1, FlightPolicy.clampDamageDropSeconds(0));
+		assertEquals(300, FlightPolicy.clampDamageDropSeconds(900));
+		assertEquals(30, FlightPolicy.damageDropSecondsFromSlider(FlightPolicy.damageDropSlider(30)));
+		assertEquals(1, FlightPolicy.damageDropSecondsFromSlider(0.0));
+		assertEquals(300, FlightPolicy.damageDropSecondsFromSlider(1.0));
+		assertEquals("30 seconds", FlightPolicy.damageDropDuration(30));
+		assertEquals("1 second", FlightPolicy.damageDropDuration(1));
+		assertEquals("5 minutes", FlightPolicy.damageDropDuration(300));
+		assertEquals("1 minute 30 seconds", FlightPolicy.damageDropDuration(90));
+		assertEquals("Players & mobs", FlightPolicy.damageDropFromName(FlightPolicy.damageDropFromId("both")));
+	}
 }

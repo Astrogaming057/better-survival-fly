@@ -26,7 +26,11 @@ public record FlightStatePayload(
 		boolean operator,
 		boolean fallDamage,
 		boolean joinMessage,
-		boolean keepFlying
+		boolean keepFlying,
+		boolean damageDrop,
+		int damageDropSeconds,
+		int damageDropFrom,
+		boolean damageLocked
 		//? if >=1.20.2 {
 		) implements CustomPacketPayload {
 		//?} else {
@@ -73,6 +77,10 @@ public record FlightStatePayload(
 		buf.writeBoolean(payload.fallDamage);
 		buf.writeBoolean(payload.joinMessage);
 		buf.writeBoolean(payload.keepFlying);
+		buf.writeBoolean(payload.damageDrop);
+		buf.writeVarInt(payload.damageDropSeconds);
+		buf.writeVarInt(payload.damageDropFrom);
+		buf.writeBoolean(payload.damageLocked);
 	}
 
 	public static FlightStatePayload read(FriendlyByteBuf buf) {
@@ -91,6 +99,10 @@ public record FlightStatePayload(
 				buf.readBoolean(),
 				buf.readBoolean(),
 				buf.readBoolean(),
+				buf.readBoolean(),
+				buf.readBoolean(),
+				buf.readVarInt(),
+				buf.readVarInt(),
 				buf.readBoolean()
 		);
 	}

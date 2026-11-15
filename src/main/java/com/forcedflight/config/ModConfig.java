@@ -19,6 +19,7 @@ import com.google.gson.JsonPrimitive;
 
 import com.forcedflight.ForcedFlight;
 import com.forcedflight.ForcedFlightServices;
+import com.forcedflight.permission.FlightPolicy;
 import com.forcedflight.permission.FlightSpeed;
 
 public final class ModConfig {
@@ -29,6 +30,9 @@ public final class ModConfig {
 	public final boolean joinMessage;
 	public final boolean flyPenalty;
 	public final boolean fallDamage;
+	public final boolean damageDrop;
+	public final int damageDropSeconds;
+	public final int damageDropFrom;
 	public final int operatorLevel;
 	public final String defaultToggleKey;
 	public final float defaultSpeed;
@@ -52,6 +56,9 @@ public final class ModConfig {
 			boolean joinMessage,
 			boolean flyPenalty,
 			boolean fallDamage,
+			boolean damageDrop,
+			int damageDropSeconds,
+			int damageDropFrom,
 			int operatorLevel,
 			String defaultToggleKey,
 			float defaultSpeed,
@@ -74,6 +81,9 @@ public final class ModConfig {
 		this.joinMessage = joinMessage;
 		this.flyPenalty = flyPenalty;
 		this.fallDamage = fallDamage;
+		this.damageDrop = damageDrop;
+		this.damageDropSeconds = FlightPolicy.clampDamageDropSeconds(damageDropSeconds);
+		this.damageDropFrom = FlightPolicy.clampDamageDropFrom(damageDropFrom);
 		this.operatorLevel = operatorLevel;
 		this.defaultToggleKey = defaultToggleKey;
 		this.defaultSpeed = defaultSpeed;
@@ -108,6 +118,9 @@ public final class ModConfig {
 				true,
 				true,
 				true,
+				false,
+				FlightPolicy.DAMAGE_DROP_DEFAULT_SECONDS,
+				FlightPolicy.DAMAGE_FROM_BOTH,
 				2,
 				"I",
 				FlightSpeed.clamp(ForcedFlight.VANILLA_FLY_SPEED, min, max),
@@ -184,6 +197,9 @@ public final class ModConfig {
 				enabled,
 				flyPenalty,
 				fallDamage,
+				damageDrop,
+				damageDropSeconds,
+				damageDropFrom,
 				operatorLevel,
 				defaultToggleKey,
 				defaultSpeed,
@@ -204,6 +220,71 @@ public final class ModConfig {
 		);
 	}
 
+	public static boolean saveDamageDrop(boolean enabled) {
+		current = current.withDamageDrop(enabled);
+		persist();
+		return current.damageDrop;
+	}
+
+	public ModConfig withDamageDrop(boolean enabled) {
+		return copy(enabled, damageDropSeconds, damageDropFrom);
+	}
+
+	public static int saveDamageDropSeconds(int seconds) {
+		current = current.withDamageDropSeconds(seconds);
+		persist();
+		return current.damageDropSeconds;
+	}
+
+	public ModConfig withDamageDropSeconds(int seconds) {
+		return copy(damageDrop, seconds, damageDropFrom);
+	}
+
+	public static int saveDamageDropFrom(int from) {
+		current = current.withDamageDropFrom(from);
+		persist();
+		return current.damageDropFrom;
+	}
+
+	public ModConfig withDamageDropFrom(int from) {
+		return copy(damageDrop, damageDropSeconds, from);
+	}
+
+	private ModConfig copy(boolean damageDrop, int damageDropSeconds, int damageDropFrom) {
+		return new ModConfig(
+				enabled,
+				joinMessage,
+				flyPenalty,
+				fallDamage,
+				damageDrop,
+				damageDropSeconds,
+				damageDropFrom,
+				operatorLevel,
+				defaultToggleKey,
+				defaultSpeed,
+				minSpeed,
+				maxSpeed,
+				speedStep,
+				hudEnabled,
+				hudAnchor,
+				hudOffsetX,
+				hudOffsetY,
+				hudDurationTicks,
+				hudShowWhileFlying,
+				enforcementEnabled,
+				enforcementResync,
+				resyncCooldownTicks,
+				bootstrapAuthorized,
+				bootstrapAllowControl
+		);
+	}
+
+	private static void persist() {
+		if (ForcedFlightServices.configFile != null) {
+			write(ForcedFlightServices.configFile, current);
+		}
+	}
+
 	public static boolean saveFallDamage(boolean enabled) {
 		current = current.withFallDamage(enabled);
 		if (ForcedFlightServices.configFile != null) {
@@ -218,6 +299,9 @@ public final class ModConfig {
 				joinMessage,
 				flyPenalty,
 				enabled,
+				damageDrop,
+				damageDropSeconds,
+				damageDropFrom,
 				operatorLevel,
 				defaultToggleKey,
 				defaultSpeed,
@@ -252,6 +336,9 @@ public final class ModConfig {
 				joinMessage,
 				enabled,
 				fallDamage,
+				damageDrop,
+				damageDropSeconds,
+				damageDropFrom,
 				operatorLevel,
 				defaultToggleKey,
 				defaultSpeed,
@@ -287,6 +374,9 @@ public final class ModConfig {
 				joinMessage,
 				flyPenalty,
 				fallDamage,
+				damageDrop,
+				damageDropSeconds,
+				damageDropFrom,
 				operatorLevel,
 				defaultToggleKey,
 				FlightSpeed.clamp(defaultSpeed, minSpeed, max),
@@ -357,6 +447,9 @@ public final class ModConfig {
 				boolOf(root, "joinMessage", base.joinMessage),
 				boolOf(root, "flyPenalty", base.flyPenalty),
 				boolOf(root, "fallDamage", base.fallDamage),
+				boolOf(root, "damageDrop", base.damageDrop),
+				intOf(root, "damageDropSeconds", base.damageDropSeconds),
+				FlightPolicy.damageDropFromId(stringOf(root, "damageDropFrom", FlightPolicy.damageDropFromId(base.damageDropFrom))),
 				operatorLevel,
 				key.trim(),
 				fallback,
@@ -409,6 +502,9 @@ public final class ModConfig {
 		root.addProperty("joinMessage", config.joinMessage);
 		root.addProperty("flyPenalty", config.flyPenalty);
 		root.addProperty("fallDamage", config.fallDamage);
+		root.addProperty("damageDrop", config.damageDrop);
+		root.addProperty("damageDropSeconds", config.damageDropSeconds);
+		root.addProperty("damageDropFrom", FlightPolicy.damageDropFromId(config.damageDropFrom));
 		root.addProperty("operatorLevel", config.operatorLevel);
 		root.addProperty("defaultToggleKey", config.defaultToggleKey);
 		JsonObject flight = new JsonObject();

@@ -44,6 +44,111 @@ public final class FlightPolicy {
 		return keepFlyingEnabled && authorized && !vanillaOwns;
 	}
 
+	public static final int DAMAGE_FROM_PLAYERS = 0;
+	public static final int DAMAGE_FROM_MOBS = 1;
+	public static final int DAMAGE_FROM_BOTH = 2;
+	public static final int DAMAGE_DROP_MIN_SECONDS = 1;
+	public static final int DAMAGE_DROP_MAX_SECONDS = 300;
+	public static final int DAMAGE_DROP_DEFAULT_SECONDS = 30;
+
+	/** Players, mobs, or both. Anything else becomes both. */
+	public static int clampDamageDropFrom(int from) {
+		if (from == DAMAGE_FROM_PLAYERS || from == DAMAGE_FROM_MOBS) {
+			return from;
+		}
+		return DAMAGE_FROM_BOTH;
+	}
+
+	/** One second through five minutes. */
+	public static int clampDamageDropSeconds(int seconds) {
+		if (seconds < DAMAGE_DROP_MIN_SECONDS) {
+			return DAMAGE_DROP_MIN_SECONDS;
+		}
+		if (seconds > DAMAGE_DROP_MAX_SECONDS) {
+			return DAMAGE_DROP_MAX_SECONDS;
+		}
+		return seconds;
+	}
+
+	public static double damageDropSlider(int seconds) {
+		return (clampDamageDropSeconds(seconds) - 1) / (double) (DAMAGE_DROP_MAX_SECONDS - 1);
+	}
+
+	public static int damageDropSecondsFromSlider(double value) {
+		double clamped = value < 0.0 ? 0.0 : (value > 1.0 ? 1.0 : value);
+		return clampDamageDropSeconds(1 + (int) Math.round(clamped * (DAMAGE_DROP_MAX_SECONDS - 1)));
+	}
+
+	/**
+	 * Environment damage never counts. A player attacker and a mob attacker are separate,
+	 * so a hit matches only the source the server selected.
+	 */
+	public static boolean damageDropsFlight(boolean enabled, int from, boolean attackerIsPlayer, boolean attackerIsMob) {
+		if (!enabled || (!attackerIsPlayer && !attackerIsMob)) {
+			return false;
+		}
+		int source = clampDamageDropFrom(from);
+		if (source == DAMAGE_FROM_PLAYERS) {
+			return attackerIsPlayer;
+		}
+		if (source == DAMAGE_FROM_MOBS) {
+			return attackerIsMob;
+		}
+		return true;
+	}
+
+	public static String damageDropFromName(int from) {
+		int source = clampDamageDropFrom(from);
+		if (source == DAMAGE_FROM_PLAYERS) {
+			return "Players";
+		}
+		if (source == DAMAGE_FROM_MOBS) {
+			return "Mobs";
+		}
+		return "Players & mobs";
+	}
+
+	public static String damageDropFromId(int from) {
+		int source = clampDamageDropFrom(from);
+		if (source == DAMAGE_FROM_PLAYERS) {
+			return "players";
+		}
+		if (source == DAMAGE_FROM_MOBS) {
+			return "mobs";
+		}
+		return "both";
+	}
+
+	public static int damageDropFromId(String raw) {
+		if (raw == null) {
+			return DAMAGE_FROM_BOTH;
+		}
+		String value = raw.trim().toLowerCase(java.util.Locale.ROOT);
+		if (value.equals("players") || value.equals("player") || value.equals("0")) {
+			return DAMAGE_FROM_PLAYERS;
+		}
+		if (value.equals("mobs") || value.equals("mob") || value.equals("1")) {
+			return DAMAGE_FROM_MOBS;
+		}
+		return DAMAGE_FROM_BOTH;
+	}
+
+	/** "30 seconds", "1 minute", or "1 minute 30 seconds". */
+	public static String damageDropDuration(int seconds) {
+		int clamped = clampDamageDropSeconds(seconds);
+		if (clamped < 60) {
+			return clamped == 1 ? "1 second" : clamped + " seconds";
+		}
+		int minutes = clamped / 60;
+		int remainder = clamped % 60;
+		String minutesText = minutes == 1 ? "1 minute" : minutes + " minutes";
+		if (remainder == 0) {
+			return minutesText;
+		}
+		String secondsText = remainder == 1 ? "1 second" : remainder + " seconds";
+		return minutesText + " " + secondsText;
+	}
+
 	public static boolean canToggleSelf(boolean operator, boolean allowControl) {
 		return operator || allowControl;
 	}
