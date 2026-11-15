@@ -13,6 +13,7 @@ out/
 # Local CurseForge installers and profile tooling
 .cf-installers/
 make-cf-profiles.ps1
+.curseforge-token
 
 # Editor rules
 .cursor/
