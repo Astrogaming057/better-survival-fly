@@ -1,6 +1,6 @@
 # Better Survival Fly
 
-Minecraft mod, version **1.2.7**, for Fabric, NeoForge, and Forge. It gives authorized players vanilla Creative flight while they stay in Survival. Health, hunger, inventory, armor, damage, death, experience, and block and entity interaction are unchanged. The mod never switches the player's game mode.
+Minecraft mod, version **1.2.14**, for Fabric, NeoForge, and Forge. It gives authorized players vanilla Creative flight while they stay in Survival. Health, hunger, inventory, armor, damage, death, experience, and block and entity interaction are unchanged. The mod never switches the player's game mode.
 
 Each Minecraft version is its own jar. Fabric covers 1.18.2 through 1.21.11 and the 26.1–26.3 releases. Forge covers those same versions except 1.21.2, which has no Forge build. NeoForge starts at 1.20.2. A jar built for one version does not load on another.
 
@@ -16,7 +16,8 @@ While the server has authorized a Survival or Adventure player:
 - Hold jump to ascend, hold sneak to descend, and use WASD relative to the camera.
 - The player can hover. Vanilla flight acceleration, sprint boost, and collision stay in charge.
 - Hold the speed key and scroll to change flight speed, or switch to up and down keys from the Flight button in the pause menu. `/flight speed <number>` still works. Scroll up is faster, scroll down is slower. A plain scroll still moves the hotbar. The number uses the same units as the HUD, so `5` means `5.00x`.
-- The pause menu Flight button also changes the toggle key and, for operators, the server cap, mining slowdown, fall damage, and join message.
+- The pause menu Flight button also changes the toggle key and, for operators, the server cap, mining slowdown, fall damage, the join message, and whether damage turns flight off.
+- When an operator turns on **Disable flight on damage**, a hit from the selected source turns flight off for the chosen time. The source is Players, Mobs, or Players & mobs. The duration is 1 second to 5 minutes and starts at 30 seconds. Those two controls stay hidden while the rule is off. The Flight button and the toggle key stay blocked until the timer ends. Dying clears the timer and turns flight back on. Fall damage, fire, and cactus do not count. The rule is off by default.
 - Creative and spectator keep vanilla flight. The mod will not enable itself or change speed in those modes.
 - Breaking blocks while flying is slower, the same as any time you are off the ground. `/flight flypenalty off` removes that slowdown while flying. Jumping still uses the vanilla slowdown.
 - Falling still hurts when flight is granted but not currently toggled on. `/flight falldamage off` removes that damage. Creative and spectator stay vanilla.
@@ -63,6 +64,13 @@ All of these are checked on the server. In the tables below, Operator also inclu
 | `/flight flypenalty` | Operator | Toggle the slower mining that vanilla applies while flying. Saved in the config. |
 | `/flight flypenalty on` | Operator | Mine slower while flying. |
 | `/flight flypenalty off` | Operator | Mine at normal speed while flying. Jumping is unchanged. |
+| `/flight damagedrop` | Operator | Toggle whether a matching hit turns flight off. Saved in the config. Off by default. |
+| `/flight damagedrop on` | Operator | Turn that rule on. |
+| `/flight damagedrop off` | Operator | Turn that rule off and restore anyone currently grounded by it. |
+| `/flight damagedrop players` | Operator | Only player attacks count. |
+| `/flight damagedrop mobs` | Operator | Only mob attacks count. |
+| `/flight damagedrop both` | Operator | Player and mob attacks count. |
+| `/flight damagedrop seconds <number>` | Operator | Set how long flight stays off, from 1 to 300 seconds. |
 | `/flight maxspeed` | Operator | Show the server-wide maximum, in the same `x` units as the speed display. |
 | `/flight maxspeed <number>` | Operator | Set that maximum, save it, and apply it to everyone online. `7.5` means `7.50x`. |
 | `/flight reload` | Operator | Reread `config.json` and `permissions.json`, then reapply them to online players. |
@@ -97,17 +105,17 @@ Jars are written to `versions/<java>/<minecraft>/<loader>/build/libs/`. The inst
 
 | Loader | Example jar |
 | --- | --- |
-| Fabric | `forcedflight-fabric-1.2.7+1.21.1.jar` |
-| NeoForge | `forcedflight-neoforge-1.2.7+1.21.1.jar` |
-| Forge | `forcedflight-forge-1.2.7+1.21.1.jar` |
+| Fabric | `forcedflight-fabric-1.2.14+1.21.1.jar` |
+| NeoForge | `forcedflight-neoforge-1.2.14+1.21.1.jar` |
+| Forge | `forcedflight-forge-1.2.14+1.21.1.jar` |
 
 ## Install
 
 Use the jar that matches both the loader and the Minecraft version. The client and the server must use the same one. A Fabric jar does not load on NeoForge or Forge, and the three jars cannot be mixed.
 
-1. NeoForge: put `forcedflight-neoforge-1.2.7+<version>.jar` in the server `mods` folder and in the NeoForge client's `mods` folder.
-2. Forge: put `forcedflight-forge-1.2.7+<version>.jar` in both Forge `mods` folders.
-3. Fabric: install Fabric Loader and Fabric API for that Minecraft version, then put `forcedflight-fabric-1.2.7+<version>.jar` in both Fabric `mods` folders.
+1. NeoForge: put `forcedflight-neoforge-1.2.14+<version>.jar` in the server `mods` folder and in the NeoForge client's `mods` folder.
+2. Forge: put `forcedflight-forge-1.2.14+<version>.jar` in both Forge `mods` folders.
+3. Fabric: install Fabric Loader and Fabric API for that Minecraft version, then put `forcedflight-fabric-1.2.14+<version>.jar` in both Fabric `mods` folders.
 
 The client alone cannot grant flight. Restart the server after copying the jar. On join, chat explains the controls: `I` or `/flight` toggles permission, double-tap jump takes off, and Alt plus scroll changes speed. `/flight` is absent until that server has the matching jar.
 
@@ -129,6 +137,8 @@ The HUD and the default key live in the client config. Speed limits, the operato
 `flyPenalty` keeps vanilla's slower mining while flying. `/flight flypenalty off` sets it to false and writes this file. A missing key stays on.
 
 `fallDamage` keeps fall damage when flight is granted but toggled off. `/flight falldamage off` sets it to false and writes this file. A missing key stays on.
+
+`damageDrop` turns flight off after a matching hit. It is off when the key is missing. `damageDropSeconds` is how long flight stays off, clamped to 1–300, and starts at 30. `damageDropFrom` is `players`, `mobs`, or `both`. `/flight damagedrop` writes these keys. The Server tab hides the source and the duration until the rule is on. A player who dies is released immediately and can fly again.
 
 `operatorLevel` is the vanilla permission level treated as an operator. `2` matches a normal OP. The value is clamped to 1–4.
 
